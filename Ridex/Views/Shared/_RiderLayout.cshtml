@@ -1,0 +1,277 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Ridex Rider</title>
+
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <style>
+        .driver-top-profile-img {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid rgba(255,255,255,0.08);
+        }
+    </style>
+</head>
+
+<body class="driver-dark-layout">
+
+    @{
+        var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+        var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+
+        string IsActive(string controller, string action)
+        {
+            return currentController == controller &&
+            currentAction == action
+            ? "active"
+            : "";
+        }
+    }
+
+    <div class="driver-shell">
+
+        <!-- Sidebar -->
+        <aside class="driver-sidebar d-none d-lg-flex">
+
+            <div>
+
+                <div class="driver-logo mb-4">
+                    <span>Ride<span>X</span></span>
+                </div>
+
+                <nav class="driver-nav">
+
+                    <a class="@IsActive("Rider", "Dashboard")"
+                       asp-controller="Rider"
+                       asp-action="Dashboard">
+                        <i class="fa-solid fa-table-columns"></i>
+                        Dashboard
+                    </a>
+
+                    <a class="@IsActive("Rider", "BookRide")"
+                       asp-controller="Rider"
+                       asp-action="BookRide">
+                        <i class="fa-solid fa-car-side"></i>
+                        Book Ride
+                    </a>
+
+                    <a class="@IsActive("Rider", "MyRides")"
+                       asp-controller="Rider"
+                       asp-action="MyRides">
+                        <i class="fa-solid fa-road"></i>
+                        My Rides
+                    </a>
+
+                    <a class="@IsActive("Rider", "Profile")"
+                       asp-controller="Rider"
+                       asp-action="Profile">
+                        <i class="fa-solid fa-user"></i>
+                        Profile
+                    </a>
+
+                </nav>
+
+            </div>
+
+            <div class="driver-logout">
+
+                <a asp-controller="Account"
+                   asp-action="Logout">
+
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    Logout
+
+                </a>
+
+            </div>
+
+        </aside>
+
+        <!-- Main Content -->
+        <main class="driver-main">
+
+            <!-- Topbar -->
+            <div class="driver-topbar">
+
+                <div>
+                    <h5 class="fw-bold mb-0">
+                        @ViewData["Title"]
+                    </h5>
+
+                    <small class="text-secondary">
+                        Rider Panel
+                    </small>
+                </div>
+
+                <div class="driver-top-actions">
+
+                    <a asp-controller="Rider"
+                       asp-action="Profile"
+                       class="text-decoration-none">
+
+                        @if (!string.IsNullOrEmpty(ViewBag.RiderProfilePhoto as string))
+                        {
+                            <img src="@ViewBag.RiderProfilePhoto"
+                                 class="driver-top-profile-img"
+                                 alt="Rider" />
+                        }
+                        else
+                        {
+                            <div class="driver-avatar text-light">
+
+                                <i class="fa-solid fa-user"></i>
+
+                            </div>
+                        }
+
+                    </a>
+
+                </div>
+
+            </div>
+
+            <!-- Page Content -->
+            <div class="driver-content">
+                @RenderBody()
+            </div>
+
+        </main>
+
+    </div>
+
+    <!-- Mobile Bottom Navigation -->
+    <div class="driver-mobile-nav d-lg-none">
+
+        <a class="@IsActive("Rider", "Dashboard")"
+           asp-controller="Rider"
+           asp-action="Dashboard">
+            <i class="fa-solid fa-house"></i>
+        </a>
+
+        <a class="@IsActive("Rider", "BookRide")"
+           asp-controller="Rider"
+           asp-action="BookRide">
+            <i class="fa-solid fa-car-side"></i>
+        </a>
+
+        <a class="@IsActive("Rider", "MyRides")"
+           asp-controller="Rider"
+           asp-action="MyRides">
+            <i class="fa-solid fa-road"></i>
+        </a>
+
+        <a class="@IsActive("Rider", "Wallet")"
+           asp-controller="Rider"
+           asp-action="Wallet">
+            <i class="fa-solid fa-wallet"></i>
+        </a>
+
+        <a class="@IsActive("Rider", "Profile")"
+           asp-controller="Rider"
+           asp-action="Profile">
+            <i class="fa-solid fa-user"></i>
+        </a>
+
+    </div>
+
+    <!-- Scripts -->
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js"></script>
+
+    <script>
+
+        const riderConnection = new signalR.HubConnectionBuilder()
+            .withUrl("/rideHub")
+            .withAutomaticReconnect()
+            .build();
+
+                 // 🔥 ADMIN RESPONSE LISTENER
+        connection.on("ReceiveAdminResponse", function (message) {
+
+            // OPTION 1: simple alert chy jagi toast banavle 
+            toast.show(message);
+
+            
+        });
+
+        connection.start()
+            .catch(err => console.error(err.toString()));
+
+            //for payment pop up
+                    riderConnection.on("RideCompleted", function (rideId) {
+            // 🔥 redirect to payment page
+            window.location.href = "Payment/Pay?rideId" + rideId;
+        });
+        
+        riderConnection.start().catch(err => console.error(err.toString()));
+
+        // Ride status updates
+        riderConnection.on("RideStatusUpdated", () => {
+            location.reload();
+        });
+
+        // Emergency acknowledgement
+        riderConnection.on("EmergencyAcknowledged", (data) => {
+
+            if (data?.message) {
+                alert(data.message);
+            }
+
+            location.reload();
+        });
+
+        // Payment completed
+        riderConnection.on("PaymentCompleted", () => {
+            location.reload();
+        });
+
+        // Connection started
+        async function startRiderSignalR() {
+
+            try {
+
+                await riderConnection.start();
+
+                console.log("Rider SignalR Connected");
+
+            }
+            catch (err) {
+
+                console.error("SignalR Connection Error:", err);
+
+                setTimeout(startRiderSignalR, 5000);
+            }
+        }
+
+        // Reconnecting
+        riderConnection.onreconnecting(() => {
+            console.warn("SignalR Reconnecting...");
+        });
+
+        // Reconnected
+        riderConnection.onreconnected(() => {
+            console.log("SignalR Reconnected");
+        });
+
+        // Closed
+        riderConnection.onclose(() => {
+            console.warn("SignalR Connection Closed");
+        });
+
+        startRiderSignalR();
+
+    </script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+
+</body>
+</html>

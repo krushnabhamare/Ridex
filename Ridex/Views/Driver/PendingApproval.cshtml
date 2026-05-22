@@ -1,0 +1,19 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Approval Pending";
+}
+
+<div class="container py-5">
+    <div class="card shadow-sm border-0 p-5 text-center">
+        <i class="fa-solid fa-clock text-warning fa-3x mb-4"></i>
+        <h2 class="fw-bold mb-3">Profile Approval Pending</h2>
+        <p class="text-muted mb-4">
+            Your driver profile has been submitted successfully and is currently under admin review.
+            You will be able to access the driver panel once your profile is approved.
+        </p>
+
+        <a asp-controller="Account" asp-action="Logout" class="btn btn-dark px-4">
+            Logout
+        </a>
+    </div>
+</div>

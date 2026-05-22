@@ -1,0 +1,445 @@
+﻿@model Ridex.ViewModels.RegisterViewModel
+
+@{
+    ViewData["Title"] = "Register";
+
+    Layout = "~/Views/Shared/_LandingLayout.cshtml";
+}
+
+<div class="auth-shell">
+
+    <div class="auth-card-wrap">
+
+        <!-- LEFT -->
+        <div class="auth-left-panel">
+
+            <!-- LOGO -->
+            <a asp-controller="Home"
+               asp-action="Index"
+               class="auth-brand text-decoration-none">
+
+                RIDE<span>X</span>
+
+            </a>
+
+            <!-- CONTENT -->
+            <div class="auth-left-content">
+
+                <h1>
+
+                    Start Your Journey<br />
+
+                    with <span>Ridex</span>
+
+                </h1>
+
+                <p>
+
+                    Join thousands of riders and drivers using Ridex every day.
+                    Reliable rides, better earnings, seamless experience.
+
+                </p>
+
+                <!-- BENEFITS -->
+                <div class="auth-benefits">
+
+                    <div>
+
+                        <i class="fa-solid fa-circle-check"></i>
+
+                        Fast & Easy Registration
+
+                    </div>
+
+                    <div>
+
+                        <i class="fa-solid fa-circle-check"></i>
+
+                        Book or Drive Anytime
+
+                    </div>
+
+                    <div>
+
+                        <i class="fa-solid fa-circle-check"></i>
+
+                        Safe & Trusted Platform
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- CAR -->
+            <div class="auth-car-image">
+
+                <img src="~/images/landing-car.png"
+                     alt="Ridex Car" />
+
+            </div>
+
+        </div>
+
+        <!-- RIGHT -->
+        <div class="auth-right-panel">
+
+            <div class="auth-form-card register-compact-card">
+
+                <!-- ICON -->
+                <div class="auth-form-logo compact-logo">
+
+                    <i class="fa-solid fa-user-plus"></i>
+
+                </div>
+
+                <!-- TITLE -->
+                <h2>
+
+                    Create Account
+
+                </h2>
+
+                <p>
+
+                    Join Ridex and ride smarter
+
+                </p>
+
+                <!-- FORM -->
+                <form asp-action="Register"
+                      method="post"
+                      class="auth-form"
+                      id="registerForm">
+
+                    <!-- VALIDATION -->
+                    <div asp-validation-summary="All"
+                         class="text-danger small mb-3">
+                    </div>
+
+                    <!-- FULL NAME -->
+                    <div class="auth-input-group compact-input">
+
+                        <i class="fa-regular fa-user"></i>
+
+                        <input asp-for="FullName"
+                               type="text"
+                               placeholder="Full Name"
+                               autocomplete="name" />
+
+                    </div>
+
+                    <span asp-validation-for="FullName"
+                          class="text-danger small d-block mb-2">
+                    </span>
+
+                    <!-- EMAIL -->
+                    <div class="auth-input-group compact-input">
+
+                        <i class="fa-regular fa-envelope"></i>
+
+                        <input asp-for="Email"
+                               type="email"
+                               placeholder="Email"
+                               autocomplete="email" />
+
+                    </div>
+
+                    <span asp-validation-for="Email"
+                          class="text-danger small d-block mb-2">
+                    </span>
+
+                    <!-- PHONE -->
+                    <div class="auth-input-group compact-input">
+
+                        <i class="fa-solid fa-phone"></i>
+
+                        <input asp-for="PhoneNumber"
+                               type="text"
+                               placeholder="Phone Number"
+                               autocomplete="tel" />
+
+                    </div>
+
+                    <span asp-validation-for="PhoneNumber"
+                          class="text-danger small d-block mb-2">
+                    </span>
+
+                    <!-- PASSWORD -->
+                    <div class="auth-input-group compact-input password-group">
+
+                        <i class="fa-solid fa-lock"></i>
+
+                        <input asp-for="Password"
+                               type="password"
+                               id="passwordInput"
+                               placeholder="Password"
+                               autocomplete="new-password" />
+
+                        <button type="button"
+                                class="password-toggle"
+                                data-target="passwordInput">
+
+                            <i class="fa-solid fa-eye"></i>
+
+                        </button>
+
+                    </div>
+
+                    <span asp-validation-for="Password"
+                          class="text-danger small d-block mb-2">
+                    </span>
+
+                    <!-- CONFIRM -->
+                    <div class="auth-input-group compact-input password-group">
+
+                        <i class="fa-solid fa-shield-halved"></i>
+
+                        <input asp-for="ConfirmPassword"
+                               type="password"
+                               id="confirmPasswordInput"
+                               placeholder="Confirm Password"
+                               autocomplete="new-password" />
+
+                        <button type="button"
+                                class="password-toggle"
+                                data-target="confirmPasswordInput">
+
+                            <i class="fa-solid fa-eye"></i>
+
+                        </button>
+
+                    </div>
+
+                    <span asp-validation-for="ConfirmPassword"
+                          class="text-danger small d-block mb-3">
+                    </span>
+
+                    <!-- ROLE -->
+                    <div class="compact-role-wrap">
+
+                        <label class="compact-role-label">
+
+                            Register As
+
+                        </label>
+
+                        <div class="compact-role-grid">
+
+                            <!-- RIDER -->
+                            <input type="radio"
+                                   class="btn-check"
+                                   asp-for="RoleName"
+                                   id="riderRole"
+                                   value="Rider"
+                                   autocomplete="off">
+
+                            <label class="compact-role-btn"
+                                   for="riderRole">
+
+                                Rider
+
+                            </label>
+
+                            <!-- DRIVER -->
+                            <input type="radio"
+                                   class="btn-check"
+                                   asp-for="RoleName"
+                                   id="driverRole"
+                                   value="Driver"
+                                   autocomplete="off">
+
+                            <label class="compact-role-btn"
+                                   for="driverRole">
+
+                                Driver
+
+                            </label>
+
+                            <!-- ADMIN -->
+                            <input type="radio"
+                                   class="btn-check"
+                                   asp-for="RoleName"
+                                   id="adminRole"
+                                   value="Admin"
+                                   autocomplete="off">
+
+                            <label class="compact-role-btn"
+                                   for="adminRole">
+
+                                Admin
+
+                            </label>
+
+                        </div>
+
+                    </div>
+
+                    <span asp-validation-for="RoleName"
+                          class="text-danger small d-block mb-3">
+                    </span>
+
+                    <!-- ADMIN KEY -->
+                    <div class="auth-input-group compact-input d-none"
+                         id="adminKeyBox">
+
+                        <i class="fa-solid fa-key"></i>
+
+                        <input asp-for="AdminKey"
+                               type="text"
+                               placeholder="Admin Secret Key"
+                               autocomplete="off" />
+
+                    </div>
+
+                    <!-- SUBMIT -->
+                    <button type="submit"
+                            class="auth-btn compact-btn"
+                            id="registerBtn">
+
+                        <span class="btn-text">
+
+                            Create Account
+
+                        </span>
+
+                        <i class="fa-solid fa-arrow-right"></i>
+
+                    </button>
+
+                    <!-- FOOTER -->
+                    <div class="compact-footer-link mt-3">
+
+                        Already have an account?
+
+                        <a asp-action="Login">
+
+                            Login
+
+                        </a>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+@section Scripts {
+
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+
+        // =============================
+        // Cached Elements
+        // =============================
+
+        const registerForm =
+            document.getElementById(
+                "registerForm");
+
+        const registerBtn =
+            document.getElementById(
+                "registerBtn");
+
+        const adminKeyBox =
+            document.getElementById(
+                "adminKeyBox");
+
+        const roleInputs =
+            document.querySelectorAll(
+                "input[name='RoleName']");
+
+        // =============================
+        // Role Change
+        // =============================
+
+        roleInputs.forEach(input => {
+
+            input.addEventListener(
+                "change",
+                function () {
+
+                    if (this.value === "Admin") {
+
+                        adminKeyBox.classList.remove(
+                            "d-none");
+                    }
+                    else {
+
+                        adminKeyBox.classList.add(
+                            "d-none");
+                    }
+                });
+        });
+
+        // =============================
+        // Password Toggle
+        // =============================
+
+        document
+            .querySelectorAll(".password-toggle")
+            .forEach(button => {
+
+                button.addEventListener(
+                    "click",
+                    function () {
+
+                        const targetId =
+                            this.dataset.target;
+
+                        const input =
+                            document.getElementById(
+                                targetId);
+
+                        const icon =
+                            this.querySelector("i");
+
+                        if (input.type === "password") {
+
+                            input.type = "text";
+
+                            icon.classList.remove(
+                                "fa-eye");
+
+                            icon.classList.add(
+                                "fa-eye-slash");
+                        }
+                        else {
+
+                            input.type = "password";
+
+                            icon.classList.remove(
+                                "fa-eye-slash");
+
+                            icon.classList.add(
+                                "fa-eye");
+                        }
+                    });
+            });
+
+        // =============================
+        // Submit Protection
+        // =============================
+
+        registerForm.addEventListener(
+            "submit",
+            function () {
+
+                if (registerBtn.disabled)
+                    return false;
+
+                registerBtn.disabled = true;
+
+                registerBtn.innerHTML =
+                    '<i class="fa-solid fa-spinner fa-spin"></i> Creating Account...';
+            });
+
+    </script>
+}

@@ -1,0 +1,290 @@
+﻿@model List<Ridex.Models.Payment>
+
+@{
+    ViewData["Title"] = "Reports";
+
+    decimal totalRevenue =
+        Model?.Where(x =>
+            x.PaymentStatus == "Paid")
+        .Sum(x => x.Amount) ?? 0;
+
+    int totalTransactions =
+        Model?.Count ?? 0;
+
+    int paidTransactions =
+        Model?.Count(x =>
+            x.PaymentStatus == "Paid") ?? 0;
+
+    int pendingTransactions =
+        Model?.Count(x =>
+            x.PaymentStatus == "Pending") ?? 0;
+}
+
+@functions {
+
+    string GetMethodBadge(string method)
+    {
+        return method switch
+        {
+            "Cash" =>
+                "bg-secondary",
+
+            "UPI" =>
+                "bg-info text-dark  ",
+
+            "Card" =>
+                "bg-primary",
+
+            _ =>
+                "bg-dark"
+        };
+    }
+
+    string GetStatusBadge(string status)
+    {
+        return status switch
+        {
+            "Paid" =>
+                "bg-success",
+
+            "Pending" =>
+                "bg-warning text-dark",
+
+            _ =>
+                "bg-secondary"
+        };
+    }
+}
+
+<!-- STATS -->
+<div class="row g-4 mb-4">
+
+    <div class="col-md-6 col-xl-3">
+
+        <div class="card p-4 h-100">
+
+            <small class="text-secondary">
+                Total Revenue
+            </small>
+
+            <h3 class="fw-bold mt-2 text-warning">
+
+                ₹@totalRevenue
+
+            </h3>
+
+            <small class="text-success">
+                Paid Revenue
+            </small>
+
+        </div>
+
+    </div>
+
+    <div class="col-md-6 col-xl-3">
+
+        <div class="card p-4 h-100">
+
+            <small class="text-secondary">
+                Transactions
+            </small>
+
+            <h3 class="fw-bold mt-2">
+
+                @totalTransactions
+
+            </h3>
+
+            <small class="text-info">
+                Total Records
+            </small>
+
+        </div>
+
+    </div>
+
+    <div class="col-md-6 col-xl-3">
+
+        <div class="card p-4 h-100">
+
+            <small class="text-secondary">
+                Paid
+            </small>
+
+            <h3 class="fw-bold mt-2">
+
+                @paidTransactions
+
+            </h3>
+
+            <small class="text-success">
+                Successful
+            </small>
+
+        </div>
+
+    </div>
+
+    <div class="col-md-6 col-xl-3">
+
+        <div class="card p-4 h-100">
+
+            <small class="text-secondary">
+                Pending
+            </small>
+
+            <h3 class="fw-bold mt-2">
+
+                @pendingTransactions
+
+            </h3>
+
+            <small class="text-warning">
+                Waiting
+            </small>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- TABLE -->
+<div class="card p-4">
+
+    <!-- TOP -->
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+
+        <h4 class="fw-bold mb-0">
+
+            Revenue Reports
+
+        </h4>
+
+        <span class="badge bg-warning text-dark">
+
+            @totalTransactions Reports
+
+        </span>
+
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-responsive">
+
+        <table class="table table-hover align-middle mb-0">
+
+            <thead>
+
+                <tr>
+
+                    <th>Payment Id</th>
+
+                    <th>Ride Id</th>
+
+                    <th>Amount</th>
+
+                    <th>Method</th>
+
+                    <th>Status</th>
+
+                    <th>Date</th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                @if (Model != null && Model.Any())
+                {
+                    @foreach (var payment in Model)
+                    {
+                        <tr>
+
+                            <!-- PAYMENT ID -->
+                            <td>
+
+                                #@payment.Id
+
+                            </td>
+
+                            <!-- RIDE ID -->
+                            <td>
+
+                                #@payment.RideId
+
+                            </td>
+
+                            <!-- AMOUNT -->
+                            <td class="fw-bold text-warning">
+
+                                ₹@payment.Amount
+
+                            </td>
+
+                            <!-- METHOD -->
+                            <td>
+
+                                <span class="badge @GetMethodBadge(payment.PaymentMethod)">
+
+                                    @payment.PaymentMethod
+
+                                </span>
+
+                            </td>
+
+                            <!-- STATUS -->
+                            <td>
+
+                                <span class="badge @GetStatusBadge(payment.PaymentStatus)">
+
+                                    @payment.PaymentStatus
+
+                                </span>
+
+                            </td>
+
+                            <!-- DATE -->
+                            <td>
+
+                                @payment.PaymentDate.ToString("dd MMM yyyy hh:mm tt")
+
+                            </td>
+
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+
+                        <td colspan="6"
+                            class="text-center py-5">
+
+                            <i class="fa-solid fa-chart-line fa-2x mb-3 text-secondary"></i>
+
+                            <div class="fw-semibold">
+
+                                No reports found
+
+                            </div>
+
+                            <small class="text-secondary">
+
+                                Revenue reports will appear here.
+
+                            </small>
+
+                        </td>
+
+                    </tr>
+                }
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>

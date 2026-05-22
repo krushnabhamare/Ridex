@@ -1,0 +1,492 @@
+﻿@model Ridex.Models.Ride
+
+@{
+    Layout = "~/Views/Shared/_DriverLayout.cshtml";
+
+    ViewData["Title"] = "Navigate Ride";
+}
+
+@functions {
+
+    string GetRideBadge(string status)
+    {
+        return status switch
+        {
+            "Accepted" =>
+                "bg-info text-dark",
+
+            "Started" =>
+                "bg-success",
+
+            _ =>
+                "bg-warning text-dark"
+        };
+    }
+}
+
+<link rel="stylesheet"
+      href="https://unpkg.com/leaflet/dist/leaflet.css" />
+
+<style>
+
+    #driverMap {
+        height: 78vh;
+        min-height: 520px;
+        border-radius: 18px;
+    }
+
+    .trip-info-box {
+        background: rgba(255,255,255,0.04);
+        border-radius: 18px;
+    }
+
+</style>
+
+<div class="row g-4">
+
+    <!-- MAP -->
+    <div class="col-lg-8">
+
+        <div class="card p-3 h-100">
+
+            <div id="driverMap"></div>
+
+        </div>
+
+    </div>
+
+    <!-- SIDE -->
+    <div class="col-lg-4">
+
+        <div class="card p-4 h-100">
+
+            <!-- TOP -->
+            <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+
+                <div>
+
+                    <h5 class="fw-bold mb-1">
+
+                        Trip Details
+
+                    </h5>
+
+                    <small class="text-secondary">
+
+                        Live route & rider controls
+
+                    </small>
+
+                </div>
+
+                <span class="badge @GetRideBadge(Model.Status)">
+
+                    @Model.Status
+
+                </span>
+
+            </div>
+
+            <!-- RIDER -->
+            <div class="d-flex align-items-center gap-3 mb-4">
+
+                <div class="driver-avatar">
+
+                    <i class="fa-solid fa-user"></i>
+
+                </div>
+
+                <div>
+
+                    <div class="fw-semibold">
+
+                        @(Model.Rider?.FullName ?? "Rider")
+
+                    </div>
+
+                    <small class="text-secondary">
+
+                        Rider
+
+                    </small>
+
+                </div>
+
+                <!-- ACTIONS -->
+                <div class="ms-auto d-flex gap-2">
+
+                    <a href="tel:@(Model.Rider?.PhoneNumber ?? "")"
+                       class="btn btn-outline-light btn-sm">
+
+                        <i class="fa-solid fa-phone"></i>
+
+                    </a>
+
+                    <button type="button"
+                            class="btn btn-outline-light btn-sm">
+
+                        <i class="fa-solid fa-message"></i>
+
+                    </button>
+
+                </div>
+
+            </div>
+
+            <!-- LOCATIONS -->
+            <div class="p-3 trip-info-box mb-4">
+
+                <!-- PICKUP -->
+                <div class="mb-3">
+
+                    <div class="fw-semibold">
+
+                        @Model.PickupLocation
+
+                    </div>
+
+                    <small class="text-secondary">
+
+                        Pickup
+
+                    </small>
+
+                </div>
+
+                <hr class="border-secondary-subtle" />
+
+                <!-- DROP -->
+                <div>
+
+                    <div class="fw-semibold">
+
+                        @Model.DropLocation
+
+                    </div>
+
+                    <small class="text-secondary">
+
+                        Drop
+
+                    </small>
+
+                </div>
+
+            </div>
+
+            <!-- STATS -->
+            <div class="row g-3 mb-4">
+
+                <!-- FARE -->
+                <div class="col-4">
+
+                    <small class="text-secondary d-block">
+
+                        Fare
+
+                    </small>
+
+                    <span class="fw-bold text-warning">
+
+                        ₹@Model.Fare
+
+                    </span>
+
+                </div>
+
+                <!-- ID -->
+                <div class="col-4">
+
+                    <small class="text-secondary d-block">
+
+                        Ride Id
+
+                    </small>
+
+                    <span class="fw-semibold">
+
+                        #@Model.Id
+
+                    </span>
+
+                </div>
+
+                <!-- OTP -->
+                <div class="col-4">
+
+                    <small class="text-secondary d-block">
+
+                        OTP
+
+                    </small>
+
+                    <span class="fw-semibold">
+
+                        @Model.OTP
+
+                    </span>
+
+                </div>
+
+            </div>
+
+            <!-- ACTIONS -->
+            <div class="d-grid gap-2">
+
+                <!-- ACCEPTED -->
+                @if (Model.Status == "Accepted")
+                {
+                    <form asp-action="StartRide"
+                          method="post"
+                          class="d-flex gap-2 start-form flex-wrap">
+
+                        @Html.AntiForgeryToken()
+
+                        <input type="hidden"
+                               name="id"
+                               value="@Model.Id" />
+
+                        <input type="text"
+                               name="otp"
+                               class="form-control"
+                               placeholder="Enter OTP"
+                               required />
+
+                        <button type="submit"
+                                class="btn btn-primary start-btn">
+
+                            Start Ride
+
+                        </button>
+
+                    </form>
+                }
+
+                <!-- STARTED -->
+                @if (Model.Status == "Started")
+                {
+                    <a asp-action="CompleteRide"
+                       asp-route-id="@Model.Id"
+                       class="btn btn-success complete-btn"
+                       onclick="disableComplete(this)">
+
+                        Complete Ride
+
+                    </a>
+                }
+
+                <!-- BACK -->
+                <a asp-action="MyAcceptedRides"
+                   class="btn btn-outline-light">
+
+                    Back
+
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+@section Scripts {
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+    <script>
+
+        // =============================
+        // Map Init
+        // =============================
+
+        const map =
+            L.map('driverMap')
+            .setView(
+                [
+                    @Model.PickupLatitude,
+                    @Model.PickupLongitude
+                ],
+                13);
+
+        // =============================
+        // Tile Layer
+        // =============================
+
+        L.tileLayer(
+            'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+            {
+                attribution:
+                    '&copy; OpenStreetMap & Carto',
+
+                subdomains: 'abcd',
+
+                maxZoom: 20
+            })
+            .addTo(map);
+
+        // =============================
+        // Pickup Marker
+        // =============================
+
+        const pickupMarker =
+            L.marker([
+                @Model.PickupLatitude,
+                @Model.PickupLongitude
+            ])
+            .addTo(map)
+            .bindPopup("Pickup");
+
+        // =============================
+        // Drop Marker
+        // =============================
+
+        const dropMarker =
+            L.marker([
+                @Model.DropLatitude,
+                @Model.DropLongitude
+            ])
+            .addTo(map)
+            .bindPopup("Drop");
+
+        // =============================
+        // Route
+        // =============================
+
+        const routeLine =
+            L.polyline(
+                [
+                    [
+                        @Model.PickupLatitude,
+                        @Model.PickupLongitude
+                    ],
+
+                    [
+                        @Model.DropLatitude,
+                        @Model.DropLongitude
+                    ]
+                ],
+                {
+                    color: '#facc15',
+                    weight: 5
+                })
+            .addTo(map);
+
+        map.fitBounds(
+            routeLine.getBounds(),
+            {
+                padding: [40, 40]
+            });
+
+        // =============================
+        // Driver Marker
+        // =============================
+
+        const driverMarker =
+            L.marker([
+                @(Model.Driver?.CurrentLatitude ?? Model.PickupLatitude),
+
+                @(Model.Driver?.CurrentLongitude ?? Model.PickupLongitude)
+            ])
+            .addTo(map)
+            .bindPopup("You");
+
+        // =============================
+        // Live Location
+        // =============================
+
+        function updateDriverLiveLocation() {
+
+            // Prevent hidden tab spam
+            if (document.hidden)
+                return;
+
+            if (!navigator.geolocation)
+                return;
+
+            navigator.geolocation.getCurrentPosition(
+
+                function (position) {
+
+                    const lat =
+                        position.coords.latitude;
+
+                    const lng =
+                        position.coords.longitude;
+
+                    // Update Marker
+                    driverMarker.setLatLng([lat, lng]);
+
+                    // Update Backend
+                    $.post(
+                        '/Driver/UpdateLiveLocation',
+                        {
+                            latitude: lat,
+                            longitude: lng
+                        });
+                },
+
+                function () {
+
+                    console.warn(
+                        "Location access denied.");
+                },
+
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 0
+                });
+        }
+
+        // =============================
+        // Complete Ride
+        // =============================
+
+        function disableComplete(btn) {
+
+            btn.classList.add("disabled");
+
+            btn.innerText =
+                "Completing...";
+        }
+
+        // =============================
+        // Start Ride Form
+        // =============================
+
+        document
+            .querySelectorAll(".start-form")
+            .forEach(form => {
+
+                form.addEventListener(
+                    "submit",
+                    function () {
+
+                        const btn =
+                            form.querySelector(".start-btn");
+
+                        btn.disabled = true;
+
+                        btn.innerText =
+                            "Starting...";
+                    });
+            });
+
+        // =============================
+        // Initial Location Update
+        // =============================
+
+        updateDriverLiveLocation();
+
+        // =============================
+        // Realtime Updates
+        // =============================
+
+        setInterval(
+            updateDriverLiveLocation,
+            15000);
+
+    </script>
+}

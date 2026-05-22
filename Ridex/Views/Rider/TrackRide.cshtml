@@ -1,0 +1,654 @@
+﻿@model Ridex.Models.Ride
+
+@{
+    ViewData["Title"] = "Track Ride";
+
+    Layout = "~/Views/Shared/_RiderLayout.cshtml";
+}
+
+@functions {
+
+    bool IsTimelineActive(
+        string currentStatus,
+        string step)
+    {
+        return currentStatus switch
+        {
+            "Accepted" =>
+                step == "Accepted",
+
+            "Started" =>
+                step == "Accepted" ||
+                step == "Started",
+
+            "Completed" =>
+                step == "Accepted" ||
+                step == "Started" ||
+                step == "Completed",
+
+            "Paid" =>
+                true,
+
+            _ => false
+        };
+    }
+
+    string GetRideBadge(string status)
+    {
+        return status switch
+        {
+            "Pending" =>
+                "bg-warning text-dark",
+
+            "Accepted" =>
+                "bg-info text-dark",
+
+            "Started" =>
+                "bg-primary",
+
+            "Completed" =>
+                "bg-success",
+
+            "Paid" =>
+                "bg-success",
+
+            "Cancelled" =>
+                "bg-danger",
+
+            _ =>
+                "bg-dark"
+        };
+    }
+}
+
+<link rel="stylesheet"
+      href="https://unpkg.com/leaflet/dist/leaflet.css" />
+
+<style>
+
+    .timeline {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 22px;
+        flex-wrap: wrap;
+    }
+
+    .timeline-step {
+        flex: 1;
+        min-width: 130px;
+        text-align: center;
+        padding: 14px;
+        border-radius: 14px;
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.06);
+        font-size: 14px;
+        font-weight: 600;
+        color: #cbd5e1;
+        transition: 0.25s ease;
+    }
+
+        .timeline-step.active {
+            background: #facc15;
+            color: #111827;
+            border-color: #facc15;
+        }
+
+    #trackMap {
+        width: 100%;
+        height: 72vh;
+        min-height: 420px;
+        border-radius: 18px;
+        display: block;
+        background: #dbeafe;
+    }
+
+        #trackMap .leaflet-tile,
+        #trackMap .leaflet-marker-icon,
+        #trackMap .leaflet-marker-shadow {
+            max-width: none !important;
+        }
+
+</style>
+
+<!-- ALERTS -->
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success border-0 shadow-sm">
+
+        @TempData["Success"]
+
+    </div>
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger border-0 shadow-sm">
+
+        @TempData["Error"]
+
+    </div>
+}
+
+<!-- MAIN -->
+<div class="card p-4 shadow-sm border-0">
+
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-3">
+
+        <div>
+
+            <h4 class="fw-bold mb-1">
+
+                Track Your Ride
+
+            </h4>
+
+            <small class="text-secondary">
+
+                @Model.PickupLocation
+                →
+                @Model.DropLocation
+
+            </small>
+
+        </div>
+
+        <span class="badge px-3 py-2 rounded-pill @GetRideBadge(Model.Status)"
+              id="rideStatusBadge">
+
+            @Model.Status
+
+        </span>
+
+    </div>
+
+    <!-- TIMELINE -->
+    <div class="timeline mb-4">
+
+        <div class="timeline-step @(IsTimelineActive(Model.Status, "Accepted") ? "active" : "")"
+             id="stepAccepted">
+
+            Ride Accepted
+
+        </div>
+
+        <div class="timeline-step @(IsTimelineActive(Model.Status, "Started") ? "active" : "")"
+             id="stepStarted">
+
+            Ride Started
+
+        </div>
+
+        <div class="timeline-step @(IsTimelineActive(Model.Status, "Completed") ? "active" : "")"
+             id="stepCompleted">
+
+            Ride Completed
+
+        </div>
+
+        <div class="timeline-step @(IsTimelineActive(Model.Status, "Paid") ? "active" : "")"
+             id="stepPaid">
+
+            Payment Done
+
+        </div>
+
+    </div>
+
+    <!-- MAP -->
+    <div id="trackMap"></div>
+
+    <!-- EMERGENCY -->
+    @if (Model.Status == "Started" &&
+        ViewBag.HasReportedEmergency != true)
+    {
+        <form asp-action="ReportEmergency"
+              method="post"
+              class="mt-3 emergency-form">
+
+            @Html.AntiForgeryToken()
+
+            <input type="hidden"
+                   name="rideId"
+                   value="@Model.Id" />
+
+            <button type="submit"
+                    class="btn btn-danger w-100 py-3 fw-semibold emergency-btn">
+
+                <i class="fa-solid fa-triangle-exclamation me-2"></i>
+
+                Report Emergency
+
+            </button>
+
+        </form>
+    }
+
+</div>
+
+<!-- PAYMENT MODAL -->
+<div class="modal fade"
+     id="paymentPopup"
+     tabindex="-1">
+
+    <div class="modal-dialog modal-dialog-centered">
+
+        <div class="modal-content border-0 shadow-lg">
+
+            <div class="modal-body text-center p-4">
+
+                <div class="mb-3">
+
+                    <i class="fa-solid fa-circle-check text-success fa-3x"></i>
+
+                </div>
+
+                <h4 class="fw-bold mb-2">
+
+                    Ride Completed
+
+                </h4>
+
+                <p class="text-secondary mb-3">
+
+                    Your ride has been completed successfully.
+
+                </p>
+
+                <div class="fw-bold fs-3 text-warning mb-4"
+                     id="popupFare">
+
+                    ₹0
+
+                </div>
+
+                <button class="btn btn-success w-100 py-3 fw-semibold"
+                        id="payNowPopupBtn">
+
+                    Pay Now
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- EMERGENCY MODAL -->
+<div class="modal fade"
+     id="emergencyAckPopup"
+     tabindex="-1">
+
+    <div class="modal-dialog modal-dialog-centered">
+
+        <div class="modal-content border-0 shadow-lg">
+
+            <div class="modal-body text-center p-4">
+
+                <i class="fa-solid fa-shield-heart text-success fa-3x mb-3"></i>
+
+                <h4 class="fw-bold mb-2">
+
+                    Support Response
+
+                </h4>
+
+                <p class="text-secondary mb-0"
+                   id="emergencyAckText"></p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+@section Scripts {
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+    <script>
+
+        // =============================
+        // Cached Elements
+        // =============================
+
+        const rideStatusBadge =
+            document.getElementById(
+                "rideStatusBadge");
+
+        const popupFare =
+            document.getElementById(
+                "popupFare");
+
+        const payNowPopupBtn =
+            document.getElementById(
+                "payNowPopupBtn");
+
+        const emergencyAckText =
+            document.getElementById(
+                "emergencyAckText");
+
+        // =============================
+        // Bootstrap Modals
+        // =============================
+
+        const paymentModal =
+            new bootstrap.Modal(
+                document.getElementById(
+                    'paymentPopup'));
+
+        const emergencyModal =
+            new bootstrap.Modal(
+                document.getElementById(
+                    'emergencyAckPopup'));
+
+        // =============================
+        // Map Init
+        // =============================
+
+        const map =
+            L.map(
+                'trackMap',
+                {
+                    preferCanvas: true
+                })
+            .setView(
+                [
+                    @Model.PickupLatitude,
+                    @Model.PickupLongitude
+                ],
+                13);
+
+        // =============================
+        // Tile Layer
+        // =============================
+
+        L.tileLayer(
+            'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+            {
+                attribution:
+                    '&copy; OpenStreetMap contributors',
+
+                maxZoom: 19
+            })
+            .addTo(map);
+
+        setTimeout(() => {
+
+            map.invalidateSize();
+
+        }, 700);
+
+        // =============================
+        // Pickup Marker
+        // =============================
+
+        const pickupMarker =
+            L.marker([
+                @Model.PickupLatitude,
+                @Model.PickupLongitude
+            ])
+            .addTo(map)
+            .bindPopup("Pickup");
+
+        // =============================
+        // Drop Marker
+        // =============================
+
+        const dropMarker =
+            L.marker([
+                @Model.DropLatitude,
+                @Model.DropLongitude
+            ])
+            .addTo(map)
+            .bindPopup("Drop");
+
+        // =============================
+        // Driver Marker
+        // =============================
+
+        const driverMarker =
+            L.marker([
+                @(Model.Driver?.CurrentLatitude ?? Model.PickupLatitude),
+
+                @(Model.Driver?.CurrentLongitude ?? Model.PickupLongitude)
+            ])
+            .addTo(map)
+            .bindPopup("Driver");
+
+        // =============================
+        // Route Line
+        // =============================
+
+        const routeLine =
+            L.polyline(
+                [
+                    [
+                        @Model.PickupLatitude,
+                        @Model.PickupLongitude
+                    ],
+
+                    [
+                        @Model.DropLatitude,
+                        @Model.DropLongitude
+                    ]
+                ],
+                {
+                    color: '#111827',
+                    weight: 5
+                })
+            .addTo(map);
+
+        map.fitBounds(
+            routeLine.getBounds(),
+            {
+                padding: [40, 40]
+            });
+
+        // =============================
+        // Timeline Update
+        // =============================
+
+        function updateTimeline(status) {
+
+            $(".timeline-step")
+                .removeClass("active");
+
+            if (status === "Accepted") {
+
+                $("#stepAccepted")
+                    .addClass("active");
+            }
+
+            else if (status === "Started") {
+
+                $("#stepAccepted, #stepStarted")
+                    .addClass("active");
+            }
+
+            else if (status === "Completed") {
+
+                $("#stepAccepted, #stepStarted, #stepCompleted")
+                    .addClass("active");
+            }
+
+            else if (status === "Paid") {
+
+                $(".timeline-step")
+                    .addClass("active");
+            }
+        }
+
+        // =============================
+        // Badge Classes
+        // =============================
+
+        function getStatusClass(status) {
+
+            switch (status) {
+
+                case "Pending":
+                    return "bg-warning text-dark";
+
+                case "Accepted":
+                    return "bg-info text-dark";
+
+                case "Started":
+                    return "bg-primary";
+
+                case "Completed":
+                    return "bg-success";
+
+                case "Paid":
+                    return "bg-success";
+
+                case "Cancelled":
+                    return "bg-danger";
+
+                default:
+                    return "bg-dark";
+            }
+        }
+
+        // =============================
+        // SignalR Safety
+        // =============================
+
+        if (typeof riderConnection === "undefined") {
+
+            console.warn(
+                "riderConnection not found.");
+        }
+        else {
+
+            // =============================
+            // Reconnect Handling
+            // =============================
+
+            riderConnection.onreconnected(
+                function () {
+
+                    console.log(
+                        "SignalR reconnected.");
+                });
+
+            // =============================
+            // Driver Location
+            // =============================
+
+            riderConnection.on(
+                "DriverLocationUpdated",
+                function (data) {
+
+                    if (data.RideId !== @Model.Id)
+                        return;
+
+                    driverMarker.setLatLng([
+                        data.Latitude,
+                        data.Longitude
+                    ]);
+                });
+
+            // =============================
+            // Ride Status
+            // =============================
+
+            riderConnection.on(
+                "RideStatusUpdated",
+                function (data) {
+
+                    if (data.RideId !== @Model.Id)
+                        return;
+
+                    rideStatusBadge.innerText =
+                        data.Status;
+
+                    rideStatusBadge.className =
+                        `badge px-3 py-2 rounded-pill ${getStatusClass(data.Status)}`;
+
+                    updateTimeline(
+                        data.Status);
+
+                    // Reload if ride started
+                    if (data.Status === "Started") {
+
+                        setTimeout(() => {
+
+                            window.location.reload();
+
+                        }, 1000);
+                    }
+                });
+
+            // =============================
+            // Ride Completed
+            // =============================
+
+            riderConnection.on(
+                "RideCompleted",
+                function (data) {
+
+                    if (data.RideId !== @Model.Id)
+                        return;
+
+                    popupFare.innerText =
+                        "₹" + data.Fare;
+
+                    payNowPopupBtn.onclick =
+                        function () {
+
+                            window.location.href =
+                                `/Payment/Pay?rideId=${data.RideId}`;
+                        };
+
+                    paymentModal.show();
+                });
+
+            // =============================
+            // Emergency Response
+            // =============================
+
+            riderConnection.on(
+                "EmergencyAcknowledged",
+                function (data) {
+
+                    if (data.RideId !== @Model.Id)
+                        return;
+
+                    emergencyAckText.innerText =
+                        data.Message;
+
+                    emergencyModal.show();
+                });
+        }
+
+        // =============================
+        // Emergency Button Protection
+        // =============================
+
+        document
+            .querySelectorAll(".emergency-form")
+            .forEach(form => {
+
+                form.addEventListener(
+                    "submit",
+                    function () {
+
+                        const btn =
+                            form.querySelector(".emergency-btn");
+
+                        btn.disabled = true;
+
+                        btn.innerHTML =
+                            '<i class="fa-solid fa-spinner fa-spin me-2"></i>Sending Alert...';
+                    });
+            });
+
+    </script>
+}

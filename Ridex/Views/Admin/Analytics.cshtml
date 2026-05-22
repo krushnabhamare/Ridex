@@ -1,0 +1,340 @@
+﻿@model List<Ridex.Models.Ride>
+
+@{
+    ViewData["Title"] = "Analytics";
+
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    // =============================
+    // Ride Status Counts
+    // =============================
+
+    int pendingCount =
+        Model?.Count(x =>
+            x.Status == "Pending") ?? 0;
+
+    int acceptedCount =
+        Model?.Count(x =>
+            x.Status == "Accepted") ?? 0;
+
+    int startedCount =
+        Model?.Count(x =>
+            x.Status == "Started") ?? 0;
+
+    int completedCount =
+        Model?.Count(x =>
+            x.Status == "Completed") ?? 0;
+
+    int paidCount =
+        Model?.Count(x =>
+            x.Status == "Paid") ?? 0;
+
+    // =============================
+    // Vehicle Counts
+    // =============================
+
+    int bikeCount =
+        Model?.Count(x =>
+            x.VehicleType == "Bike") ?? 0;
+
+    int autoCount =
+        Model?.Count(x =>
+            x.VehicleType == "Auto") ?? 0;
+
+    int carCount =
+        Model?.Count(x =>
+            x.VehicleType == "Car") ?? 0;
+
+    // =============================
+    // Top Pickup Zones
+    // =============================
+
+    var pickupZones =
+        Model?
+        .GroupBy(x => x.PickupLocation)
+        .OrderByDescending(x => x.Count())
+        .Take(5)
+        .ToList();
+
+    // =============================
+    // Top Drop Zones
+    // =============================
+
+    var dropZones =
+        Model?
+        .GroupBy(x => x.DropLocation)
+        .OrderByDescending(x => x.Count())
+        .Take(5)
+        .ToList();
+}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+
+    .analytics-zone-item {
+        border-bottom: 1px solid rgba(255,255,255,0.06);
+        padding-bottom: 10px;
+    }
+
+        .analytics-zone-item:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+</style>
+
+<!-- CHARTS -->
+<div class="row g-4">
+
+    <!-- STATUS -->
+    <div class="col-lg-6">
+
+        <div class="card p-4 h-100">
+
+            <h5 class="fw-bold mb-3">
+
+                Ride Status Distribution
+
+            </h5>
+
+            <canvas id="statusChart"
+                    height="180"></canvas>
+
+        </div>
+
+    </div>
+
+    <!-- VEHICLE -->
+    <div class="col-lg-6">
+
+        <div class="card p-4 h-100">
+
+            <h5 class="fw-bold mb-3">
+
+                Vehicle Usage
+
+            </h5>
+
+            <canvas id="vehicleChart"
+                    height="180"></canvas>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- ZONES -->
+<div class="row g-4 mt-1">
+
+    <!-- PICKUP -->
+    <div class="col-lg-6">
+
+        <div class="card p-4 h-100">
+
+            <h5 class="fw-bold mb-3">
+
+                Top Pickup Zones
+
+            </h5>
+
+            <div class="d-flex flex-column gap-3">
+
+                @if (pickupZones != null && pickupZones.Any())
+                {
+                    @foreach (var item in pickupZones)
+                    {
+                        <div class="d-flex justify-content-between analytics-zone-item">
+
+                            <span>
+
+                                @item.Key
+
+                            </span>
+
+                            <span class="text-info fw-semibold">
+
+                                @item.Count()
+
+                            </span>
+
+                        </div>
+                    }
+                }
+                else
+                {
+                    <small class="text-secondary">
+
+                        No pickup data found.
+
+                    </small>
+                }
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- DROP -->
+    <div class="col-lg-6">
+
+        <div class="card p-4 h-100">
+
+            <h5 class="fw-bold mb-3">
+
+                Top Drop Zones
+
+            </h5>
+
+            <div class="d-flex flex-column gap-3">
+
+                @if (dropZones != null && dropZones.Any())
+                {
+                    @foreach (var item in dropZones)
+                    {
+                        <div class="d-flex justify-content-between analytics-zone-item">
+
+                            <span>
+
+                                @item.Key
+
+                            </span>
+
+                            <span class="text-info fw-semibold">
+
+                                @item.Count()
+
+                            </span>
+
+                        </div>
+                    }
+                }
+                else
+                {
+                    <small class="text-secondary">
+
+                        No drop data found.
+
+                    </small>
+                }
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+@section Scripts {
+
+    <script>
+
+        // =============================
+        // Status Chart
+        // =============================
+
+        new Chart(
+            document.getElementById(
+                'statusChart'),
+            {
+                type: 'doughnut',
+
+                data: {
+
+                    labels: [
+                        'Pending',
+                        'Accepted',
+                        'Started',
+                        'Completed',
+                        'Paid'
+                    ],
+
+                    datasets: [{
+                        data: [
+                            @pendingCount,
+                            @acceptedCount,
+                            @startedCount,
+                            @completedCount,
+                            @paidCount
+                        ],
+
+                        borderWidth: 0
+                    }]
+                },
+
+                options: {
+
+                    responsive: true,
+
+                    plugins: {
+
+                        legend: {
+
+                            labels: {
+                                color: '#fff'
+                            }
+                        }
+                    }
+                }
+            });
+
+        // =============================
+        // Vehicle Chart
+        // =============================
+
+        new Chart(
+            document.getElementById(
+                'vehicleChart'),
+            {
+                type: 'bar',
+
+                data: {
+
+                    labels: [
+                        'Bike',
+                        'Auto',
+                        'Car'
+                    ],
+
+                    datasets: [{
+                        data: [
+                            @bikeCount,
+                            @autoCount,
+                            @carCount
+                        ]
+                    }]
+                },
+
+                options: {
+
+                    responsive: true,
+
+                    plugins: {
+
+                        legend: {
+                            display: false
+                        }
+                    },
+
+                    scales: {
+
+                        x: {
+                            ticks: {
+                                color: '#fff'
+                            }
+                        },
+
+                        y: {
+                            ticks: {
+                                color: '#fff'
+                            }
+                        }
+                    }
+                }
+            });
+
+    </script>
+}

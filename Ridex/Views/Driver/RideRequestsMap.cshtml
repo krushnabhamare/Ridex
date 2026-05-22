@@ -1,0 +1,209 @@
+﻿@model List<Ridex.Models.Ride>
+
+@{
+    ViewData["Title"] = "Ride Requests Map";
+    Layout = "~/Views/Shared/_DriverLayout.cshtml";
+}
+
+<link rel="stylesheet"
+      href="https://unpkg.com/leaflet/dist/leaflet.css" />
+
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+
+    <div>
+
+        <h4 class="fw-bold mb-1">
+            Nearby Ride Requests
+        </h4>
+
+        <small class="text-secondary">
+            Live map view for nearby rider requests
+        </small>
+
+    </div>
+
+    <a asp-action="RideRequests"
+       class="btn btn-outline-light btn-sm">
+
+        <i class="fa-solid fa-table me-2"></i>
+
+        Table View
+
+    </a>
+
+</div>
+
+<div class="card p-3 border-0 shadow-sm">
+
+    @if (Model != null && Model.Any())
+    {
+        <div id="requestsMap"
+             style="height:780px;border-radius:18px;"></div>
+    }
+    else
+    {
+        <div class="text-center py-5">
+
+            <i class="fa-solid fa-map-location-dot fa-2x mb-3 text-secondary"></i>
+
+            <div class="fw-semibold">
+                No nearby ride requests
+            </div>
+
+            <div class="text-secondary small">
+                Nearby ride requests will appear here automatically.
+            </div>
+
+        </div>
+    }
+
+</div>
+
+@section Scripts {
+
+    @if (Model != null && Model.Any())
+    {
+        <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+        <script>
+
+            // =============================
+            // Map Initialization
+            // =============================
+
+            const map =
+                L.map(
+                    'requestsMap',
+                    {
+                        zoomControl: false,
+                        preferCanvas: true
+                    });
+
+            map.setView(
+                [18.5204, 73.8567],
+                12);
+
+            L.control.zoom({
+                position: 'bottomright'
+            }).addTo(map);
+
+            // =============================
+            // Tile Layer
+            // =============================
+
+            L.tileLayer(
+                'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+                {
+                    attribution: '&copy; OpenStreetMap & Carto',
+                    subdomains: 'abcd',
+                    maxZoom: 20
+                })
+                .addTo(map);
+
+            setTimeout(() => {
+                map.invalidateSize();
+            }, 700);
+
+            // =============================
+            // Bounds
+            // =============================
+
+            const bounds = [];
+
+            // =============================
+            // Ride Markers
+            // =============================
+
+            @foreach (var ride in Model)
+            {
+                    <text>
+
+                        const marker =
+                            L.marker([
+                                @ride.PickupLatitude,
+                                @ride.PickupLongitude
+                            ])
+                            .addTo(map)
+                            .bindPopup(`
+                                <div style="min-width:230px">
+
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+
+                                        <strong>
+                                            Ride #@ride.Id
+                                        </strong>
+
+                                        <span style="color:#facc15;font-weight:700;">
+
+                                            ₹@ride.Fare
+
+                                        </span>
+
+                                    </div>
+
+                                    <div style="margin-bottom:8px;">
+
+                                        <div>
+                                            <strong>
+                                                @ride.PickupLocation
+                                            </strong>
+                                        </div>
+
+                                        <small style="color:#94a3b8;">
+                                            Pickup
+                                        </small>
+
+                                    </div>
+
+                                    <div style="margin-bottom:12px;">
+
+                                        <div>
+                                            <strong>
+                                                @ride.DropLocation
+                                            </strong>
+                                        </div>
+
+                                        <small style="color:#94a3b8;">
+                                            Drop
+                                        </small>
+
+                                    </div>
+
+                                    <a href="@Url.Action("AcceptRide", "Driver", new { id = ride.Id })"
+                                       class="btn btn-warning btn-sm w-100"
+                                       onclick="
+                                            this.classList.add('disabled');
+                                            this.style.pointerEvents='none';
+                                            this.innerText='Accepting...';">
+
+                                        Accept Ride
+
+                                    </a>
+
+                                </div>
+                            `);
+
+                        bounds.push([
+                            @ride.PickupLatitude,
+                            @ride.PickupLongitude
+                        ]);
+
+                    </text>
+            }
+
+            // =============================
+            // Fit Bounds
+            // =============================
+
+            if (bounds.length > 0) {
+
+                map.fitBounds(
+                    bounds,
+                    {
+                        padding: [40, 40]
+                    });
+            }
+
+        </script>
+    }
+}

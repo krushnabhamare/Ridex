@@ -1,0 +1,651 @@
+﻿@model List<Ridex.Models.Ride>
+
+@{
+    ViewData["Title"] = "Rider Dashboard";
+
+    Layout = "~/Views/Shared/_RiderLayout.cshtml";
+
+    var activeRide =
+        ViewBag.ActiveRide as Ridex.Models.Ride;
+
+    var lastRide =
+        Model?.FirstOrDefault();
+
+    int totalRides =
+        Model?.Count ?? 0;
+
+    string activeRideStatus =
+        activeRide != null
+        ? activeRide.Status
+        : "No Active Ride";
+
+    string activeRideText =
+        activeRide != null
+        ? "Ride in progress"
+        : "No active trip";
+}
+
+@functions {
+
+    string GetRideBadge(string status)
+    {
+        return status switch
+        {
+            "Pending" =>
+                "bg-warning text-dark",
+
+            "Accepted" =>
+                "bg-info text-dark",
+
+            "Started" =>
+                "bg-success",
+
+            "Completed" =>
+                "bg-primary",
+
+            "Paid" =>
+                "bg-success",
+
+            "Cancelled" =>
+                "bg-danger",
+
+            _ =>
+                "bg-dark"
+        };
+    }
+}
+
+<style>
+
+
+
+    .rider-stat-card {
+        height: 100%;
+    }
+
+    .rider-soft-box {
+        background: rgba(255,255,255,0.04);
+        border-radius: 18px;
+    }
+
+    .rider-summary-row {
+        padding-bottom: 12px;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+
+        .rider-summary-row:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+
+    /* =========================
+       MOBILE FIX ONLY (≤400px)
+       DESKTOP UNCHANGED
+    ========================= */
+
+    @@media (max-width: 400px) {
+        /* SPACING */
+        .row {
+            --bs-gutter-x: 8px;
+            --bs-gutter-y: 8px;
+        }
+
+        .card {
+            padding: 14px !important;
+            border-radius: 14px;
+        }
+        /* TEXT SCALE */
+        h2 {
+            font-size: 18px !important;
+        }
+
+        h4 {
+            font-size: 15px !important;
+        }
+
+        h5 {
+            font-size: 14px !important;
+        }
+        /* BUTTON */
+        .btn {
+            width: 100%;
+            font-size: 13px;
+            padding: 8px;
+        }
+        /* ACTIVE RIDE */
+        .rider-soft-box {
+            padding: 12px !important;
+        }
+
+            .rider-soft-box .fs-5 {
+                font-size: 14px !important;
+            }
+
+        .text-lg-end {
+            text-align: left !important;
+            width: 100%;
+        }
+
+        .table {
+            font-size: 9px; /* aur chota */
+            table-layout: fixed;
+        }
+
+            .table th {
+                font-size: 8px;
+                padding: 4px 2px;
+            }
+
+            .table td {
+                padding: 4px 2px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+                /* COLUMN WIDTH CONTROL (MAIN FIX) */
+                .table td:nth-child(1) {
+                    max-width: 50px;
+                }
+                /* Pickup */
+                .table td:nth-child(2) {
+                    max-width: 50px;
+                }
+                /* Drop */
+                .table td:nth-child(3) {
+                    max-width: 45px;
+                }
+                /* Fare */
+                /* STATUS COLUMN WIDER */
+                .table td:nth-child(4) {
+                    max-width: 85px; /* IMPORTANT */
+                }
+                /* DATE SMALL */
+                .table td:nth-child(5) {
+                    max-width: 45px;
+                    font-size: 8px;
+                }
+                /* =========================
+           BADGE FIX (IMPORTANT)
+        ========================= */
+
+                .table td:nth-child(4) {
+                    text-align: center;
+                }
+
+        .badge {
+            font-size: 10px !important;
+            padding: 6px 10px !important;
+            min-width: 75px; /* SAME SIZE FOR ALL */
+            border-radius: 20px;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+        }
+        /* DATE COLUMN CONTROL */
+        .table td:last-child {
+            max-width: 55px;
+        }
+    }
+
+
+</style>
+
+<!-- TOP STATS -->
+<div class="row g-4">
+
+    <!-- TOTAL -->
+    <div class="col-md-6 col-xl-4">
+
+        <div class="card p-4 border-0 shadow-sm rider-stat-card">
+
+            <small class="text-secondary">
+
+                Total Rides
+
+            </small>
+
+            <div class="d-flex justify-content-between align-items-center mt-3">
+
+                <h2 class="fw-bold mb-0">
+
+                    @ViewBag.TotalRides
+
+                </h2>
+
+                <div class="driver-icon-btn">
+
+                    <i class="fa-solid fa-road"></i>
+
+                </div>
+
+            </div>
+
+            <small class="text-secondary mt-2 d-block">
+
+                All completed and ongoing trips
+
+            </small>
+
+        </div>
+
+    </div>
+
+    <!-- SPENT -->
+    <div class="col-md-6 col-xl-4">
+
+        <div class="card p-4 border-0 shadow-sm rider-stat-card">
+
+            <small class="text-secondary">
+
+                Total Spent
+
+            </small>
+
+            <div class="d-flex justify-content-between align-items-center mt-3">
+
+                <h2 class="fw-bold mb-0 text-warning">
+
+                    ₹@ViewBag.TotalSpent
+
+                </h2>
+
+                <div class="driver-icon-btn">
+
+                    <i class="fa-solid fa-wallet"></i>
+
+                </div>
+
+            </div>
+
+            <small class="text-secondary mt-2 d-block">
+
+                Lifetime ride spending
+
+            </small>
+
+        </div>
+
+    </div>
+
+    <!-- CURRENT -->
+    <div class="col-md-6 col-xl-4">
+
+        <div class="card p-4 border-0 shadow-sm rider-stat-card">
+
+            <small class="text-secondary">
+
+                Current Ride
+
+            </small>
+
+            <div class="d-flex justify-content-between align-items-center mt-3">
+
+                <h2 class="fw-bold mb-0">
+
+                    @activeRideStatus
+
+                </h2>
+
+                <div class="driver-icon-btn">
+
+                    <i class="fa-solid fa-car-side"></i>
+
+                </div>
+
+            </div>
+
+            <small class="text-secondary mt-2 d-block">
+
+                @activeRideText
+
+            </small>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- MAIN -->
+<div class="row g-4 mt-1">
+
+    <!-- LEFT -->
+    <div class="col-lg-8">
+
+        <div class="card p-4 border-0 shadow-sm h-100">
+
+            <!-- TOP -->
+            <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+
+                <div>
+
+                    <h4 class="fw-bold mb-1">
+
+                        Quick Actions
+
+                    </h4>
+
+                    <small class="text-secondary">
+
+                        Book and manage your rides instantly
+
+                    </small>
+
+                </div>
+
+                <a asp-action="BookRide"
+                   class="btn btn-warning fw-semibold px-4">
+
+                    Book Ride
+
+                </a>
+
+            </div>
+
+            <!-- ACTIVE RIDE -->
+            @if (activeRide != null)
+            {
+                <div class="p-4 rider-soft-box">
+
+                    <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+
+                        <!-- LEFT -->
+                        <div>
+
+                            <span class="badge @GetRideBadge(activeRide.Status) mb-3">
+
+                                @activeRide.Status
+
+                            </span>
+
+                            <div class="fw-semibold fs-5">
+
+                                @activeRide.PickupLocation
+
+                            </div>
+
+                            <small class="text-secondary d-block mb-2">
+
+                                Pickup
+
+                            </small>
+
+                            <div class="fw-semibold fs-5">
+
+                                @activeRide.DropLocation
+
+                            </div>
+
+                            <small class="text-secondary d-block">
+
+                                Drop
+
+                            </small>
+
+                        </div>
+
+                        <!-- RIGHT -->
+                        <div class="text-lg-end">
+
+                            <div class="fw-bold fs-4 text-warning">
+
+                                ₹@activeRide.Fare
+
+                            </div>
+
+                            <small class="text-secondary d-block mb-3">
+
+                                @* @activeRide.CreatedAt
+                                .ToString("
+                                yyyy hh:mm tt") *@
+                                @activeRide.CreatedAt.ToString("dd MMM yyyy hh:mm tt")
+                            </small>
+
+                            <a asp-action="TrackRide"
+                               asp-route-id="@activeRide.Id"
+                               class="btn btn-outline-light btn-sm px-4">
+
+                                Track Ride
+
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+
+                    <i class="fa-solid fa-location-dot fa-2x mb-3 text-secondary"></i>
+
+                    <div class="fw-semibold">
+
+                        No active rides
+
+                    </div>
+
+                    <div class="text-secondary small">
+
+                        Book your next ride in just a few clicks.
+
+                    </div>
+
+                </div>
+            }
+
+        </div>
+
+    </div>
+
+    <!-- RIGHT -->
+    <div class="col-lg-4">
+
+        <div class="card p-4 border-0 shadow-sm h-100">
+
+            <h5 class="fw-bold mb-4">
+
+                Ride Summary
+
+            </h5>
+
+            <div class="d-flex flex-column gap-4">
+
+                <!-- RECENT -->
+                <div class="d-flex justify-content-between align-items-center rider-summary-row">
+
+                    <span class="text-secondary">
+
+                        Recent Trips
+
+                    </span>
+
+                    <span class="fw-semibold">
+
+                        @totalRides
+
+                    </span>
+
+                </div>
+
+                <!-- STATUS -->
+                <div class="d-flex justify-content-between align-items-center rider-summary-row">
+
+                    <span class="text-secondary">
+
+                        Active Status
+
+                    </span>
+
+                    <span class="fw-semibold">
+
+                        @activeRideStatus
+
+                    </span>
+
+                </div>
+
+                <!-- FARE -->
+                <div class="d-flex justify-content-between align-items-center rider-summary-row">
+
+                    <span class="text-secondary">
+
+                        Last Ride Fare
+
+                    </span>
+
+                    <span class="fw-semibold text-warning">
+
+                        ₹@(lastRide?.Fare ?? 0)
+
+                    </span>
+
+                </div>
+
+                <!-- DATE -->
+                <div class="d-flex justify-content-between align-items-center">
+
+                    <span class="text-secondary">
+
+                        Last Ride Date
+
+                    </span>
+
+                    <span class="fw-semibold">
+
+                        @(lastRide != null?lastRide.CreatedAt.ToString("dd MMM"): "--")
+
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- RECENT RIDES -->
+<div class="card p-4 mt-4 border-0 shadow-sm">
+
+    <!-- TOP -->
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+
+        <div>
+
+            <h4 class="fw-bold mb-1">
+
+                Recent Rides
+
+            </h4>
+
+            <small class="text-secondary">
+
+                Your latest ride activity
+
+            </small>
+
+        </div>
+
+    </div>
+
+    @if (Model != null && Model.Any())
+    {
+        <div class="table-responsive">
+
+            <table class="table align-middle mb-0">
+
+                <thead>
+
+                    <tr>
+
+                        <th>Pickup</th>
+
+                        <th>Drop</th>
+
+                        <th>Fare</th>
+
+                        <th>Status</th>
+
+                        <th>Date</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    @foreach (var ride in Model)
+                    {
+                        <tr>
+
+                            <td>
+
+                                @ride.PickupLocation
+
+                            </td>
+
+                            <td>
+
+                                @ride.DropLocation
+
+                            </td>
+
+                            <td class="fw-semibold text-warning">
+
+                                ₹@ride.Fare
+
+                            </td>
+
+                            <td>
+
+                                <span class="badge @GetRideBadge(ride.Status)">
+
+                                    @ride.Status
+
+                                </span>
+
+                            </td>
+
+                            <td>
+
+                                @ride.CreatedAt.ToString("dd MMM yyyy  hh:mm tt")
+
+                            </td>
+
+                        </tr>
+                    }
+
+                </tbody>
+
+            </table>
+
+        </div>
+    }
+    else
+    {
+        <div class="text-center py-5">
+
+            <i class="fa-solid fa-clock-rotate-left fa-2x mb-3 text-secondary"></i>
+
+            <div class="fw-semibold">
+
+                No rides found
+
+            </div>
+
+            <div class="text-secondary small">
+
+                Your completed rides will appear here.
+
+            </div>
+
+        </div>
+    }
+
+</div>

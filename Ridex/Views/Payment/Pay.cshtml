@@ -1,0 +1,349 @@
+﻿@model Ridex.Models.Ride
+
+@{
+    ViewData["Title"] = "Pay Now";
+}
+
+<style>
+
+    .payment-container {
+        max-width: 650px;
+    }
+
+    .payment-method-card {
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 16px;
+        padding: 16px;
+        cursor: pointer;
+        transition: 0.2s ease;
+    }
+
+        .payment-method-card:hover {
+            transform: translateY(-2px);
+            border-color: #facc15;
+        }
+
+        .payment-method-card.active {
+            border-color: #facc15;
+            background: rgba(250,204,21,0.08);
+        }
+
+    .fare-summary-row {
+        padding-bottom: 12px;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+
+        .fare-summary-row:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+</style>
+
+<div class="container mt-5 payment-container">
+
+    <!-- TOP -->
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+
+        <div>
+
+            <h2 class="fw-bold mb-1">
+
+                Ride Payment
+
+            </h2>
+
+            <small class="text-secondary">
+
+                Complete your payment securely
+
+            </small>
+
+        </div>
+
+        <div class="driver-icon-btn">
+
+            <i class="fa-solid fa-credit-card"></i>
+
+        </div>
+
+    </div>
+
+    <!-- ERROR -->
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger border-0 shadow-sm">
+
+            @TempData["Error"]
+
+        </div>
+    }
+
+    <!-- CARD -->
+    <div class="card p-4 shadow-sm border-0">
+
+        <!-- SUMMARY -->
+        <div class="d-flex flex-column gap-3 mb-4">
+
+            <!-- PICKUP -->
+            <div class="d-flex justify-content-between align-items-center fare-summary-row">
+
+                <span class="text-secondary">
+
+                    Pickup
+
+                </span>
+
+                <span class="fw-semibold text-end">
+
+                    @Model.PickupLocation
+
+                </span>
+
+            </div>
+
+            <!-- DROP -->
+            <div class="d-flex justify-content-between align-items-center fare-summary-row">
+
+                <span class="text-secondary">
+
+                    Drop
+
+                </span>
+
+                <span class="fw-semibold text-end">
+
+                    @Model.DropLocation
+
+                </span>
+
+            </div>
+
+            <!-- FARE -->
+            <div class="d-flex justify-content-between align-items-center pt-2">
+
+                <span class="text-secondary">
+
+                    Total Fare
+
+                </span>
+
+                <span class="fw-bold text-warning fs-4">
+
+                    ₹@Model.Fare
+
+                </span>
+
+            </div>
+
+        </div>
+
+        <hr />
+
+        <!-- FORM -->
+        <form asp-action="PayNow"
+              method="post"
+              id="paymentForm">
+
+            @Html.AntiForgeryToken()
+
+            <input type="hidden"
+                   name="rideId"
+                   value="@Model.Id" />
+
+            <input type="hidden"
+                   name="paymentMethod"
+                   id="paymentMethod"
+                   value="Cash" />
+
+            <!-- METHODS -->
+            <div class="mb-4">
+
+                <label class="form-label fw-semibold mb-3">
+
+                    Select Payment Method
+
+                </label>
+
+                <div class="d-flex flex-column gap-3">
+
+                    <!-- CASH -->
+                    <div class="payment-method-card active"
+                         data-method="Cash">
+
+                        <div class="d-flex justify-content-between align-items-center">
+
+                            <div class="d-flex align-items-center gap-3">
+
+                                <i class="fa-solid fa-money-bill-wave text-success"></i>
+
+                                <div>
+
+                                    <div class="fw-semibold">
+
+                                        Cash
+
+                                    </div>
+
+                                    <small class="text-secondary">
+
+                                        Pay directly to driver
+
+                                    </small>
+
+                                </div>
+
+                            </div>
+
+                            <i class="fa-solid fa-circle-check text-warning"></i>
+
+                        </div>
+
+                    </div>
+
+                    <!-- UPI -->
+                    <div class="payment-method-card"
+                         data-method="UPI">
+
+                        <div class="d-flex justify-content-between align-items-center">
+
+                            <div class="d-flex align-items-center gap-3">
+
+                                <i class="fa-solid fa-mobile-screen-button text-info"></i>
+
+                                <div>
+
+                                    <div class="fw-semibold">
+
+                                        UPI
+
+                                    </div>
+
+                                    <small class="text-secondary">
+
+                                        Fast digital payment
+
+                                    </small>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <!-- CARD -->
+                    <div class="payment-method-card"
+                         data-method="Card">
+
+                        <div class="d-flex justify-content-between align-items-center">
+
+                            <div class="d-flex align-items-center gap-3">
+
+                                <i class="fa-solid fa-credit-card text-warning"></i>
+
+                                <div>
+
+                                    <div class="fw-semibold">
+
+                                        Card
+
+                                    </div>
+
+                                    <small class="text-secondary">
+
+                                        Debit / Credit Card
+
+                                    </small>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- SUBMIT -->
+            <button type="submit"
+                    class="btn btn-warning w-100 fw-semibold py-3"
+                    id="payBtn">
+
+                Pay Now
+
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+@section Scripts {
+
+    <script>
+
+        // =============================
+        // Cached Elements
+        // =============================
+
+        const paymentForm =
+            document.getElementById(
+                "paymentForm");
+
+        const payBtn =
+            document.getElementById(
+                "payBtn");
+
+        const paymentMethodInput =
+            document.getElementById(
+                "paymentMethod");
+
+        // =============================
+        // Payment Cards
+        // =============================
+
+        document
+            .querySelectorAll(".payment-method-card")
+            .forEach(card => {
+
+                card.addEventListener(
+                    "click",
+                    function () {
+
+                        document
+                            .querySelectorAll(".payment-method-card")
+                            .forEach(c =>
+                                c.classList.remove("active"));
+
+                        this.classList.add("active");
+
+                        paymentMethodInput.value =
+                            this.dataset.method;
+                    });
+            });
+
+        // =============================
+        // Submit Protection
+        // =============================
+
+        paymentForm.addEventListener(
+            "submit",
+            function () {
+
+                if (payBtn.disabled)
+                    return false;
+
+                payBtn.disabled = true;
+
+                payBtn.innerHTML =
+                    '<i class="fa-solid fa-spinner fa-spin me-2"></i>Processing Payment...';
+            });
+
+    </script>
+}

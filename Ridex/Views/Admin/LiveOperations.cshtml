@@ -1,0 +1,367 @@
+﻿@model List<Ridex.Models.Ride>
+
+@using System.Text.Json
+
+@{
+    ViewData["Title"] = "Live Operations";
+
+    int pending =
+        Model?.Count(x =>
+            x.Status == "Pending") ?? 0;
+
+    int accepted =
+        Model?.Count(x =>
+            x.Status == "Accepted") ?? 0;
+
+    int started =
+        Model?.Count(x =>
+            x.Status == "Started") ?? 0;
+
+    int total =
+        Model?.Count ?? 0;
+}
+
+@functions {
+
+    string GetRideBadge(string status)
+    {
+        return status switch
+        {
+            "Pending" =>
+                "bg-warning text-dark",
+
+            "Accepted" =>
+                "bg-info text-dark",
+
+            "Started" =>
+                "bg-success",
+
+            _ =>
+                "bg-secondary"
+        };
+    }
+}
+
+<link rel="stylesheet"
+      href="https://unpkg.com/leaflet/dist/leaflet.css" />
+
+<style>
+
+    #liveOpsMap {
+        height: 720px;
+        border-radius: 18px;
+    }
+
+    .feed-scroll {
+        max-height: 700px;
+        overflow-y: auto;
+    }
+
+    .ride-feed-card {
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.06);
+    }
+
+</style>
+
+<!-- STATS -->
+<div class="row g-4 mb-4">
+
+    <div class="col-md-6 col-xl-3">
+
+        <div class="card p-4">
+
+            <small class="text-secondary">
+                Live Requests
+            </small>
+
+            <h3 class="fw-bold mt-2">
+                @total
+            </h3>
+
+            <small class="text-info">
+                Real-time
+            </small>
+
+        </div>
+
+    </div>
+
+    <div class="col-md-6 col-xl-3">
+
+        <div class="card p-4">
+
+            <small class="text-secondary">
+                Pending
+            </small>
+
+            <h3 class="fw-bold mt-2">
+                @pending
+            </h3>
+
+            <small class="text-warning">
+                Waiting
+            </small>
+
+        </div>
+
+    </div>
+
+    <div class="col-md-6 col-xl-3">
+
+        <div class="card p-4">
+
+            <small class="text-secondary">
+                Accepted
+            </small>
+
+            <h3 class="fw-bold mt-2">
+                @accepted
+            </h3>
+
+            <small class="text-info">
+                Assigned
+            </small>
+
+        </div>
+
+    </div>
+
+    <div class="col-md-6 col-xl-3">
+
+        <div class="card p-4">
+
+            <small class="text-secondary">
+                Started
+            </small>
+
+            <h3 class="fw-bold mt-2">
+                @started
+            </h3>
+
+            <small class="text-success">
+                On Route
+            </small>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- MAP + FEED -->
+<div class="row g-4">
+
+    <!-- MAP -->
+    <div class="col-lg-8">
+
+        <div class="card p-3 h-100">
+
+            <div class="d-flex justify-content-between align-items-center mb-3">
+
+                <h5 class="fw-bold mb-0">
+                    Live Ride Map
+                </h5>
+
+                <span class="badge bg-warning text-dark">
+
+                    @total Active
+
+                </span>
+
+            </div>
+
+            <div id="liveOpsMap"></div>
+
+        </div>
+
+    </div>
+
+    <!-- FEED -->
+    <div class="col-lg-4">
+
+        <div class="card p-4 h-100">
+
+            <div class="d-flex justify-content-between align-items-center mb-3">
+
+                <h5 class="fw-bold mb-0">
+                    Active Ride Feed
+                </h5>
+
+                <span class="badge bg-info text-dark">
+                    Live
+                </span>
+
+            </div>
+
+            <div class="d-flex flex-column gap-3 feed-scroll">
+
+                @if (Model != null && Model.Any())
+                {
+                    @foreach (var ride in Model)
+                    {
+                        <div class="p-3 rounded-4 ride-feed-card">
+
+                            <!-- TOP -->
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+
+                                <span class="badge @GetRideBadge(ride.Status)">
+
+                                    @ride.Status
+
+                                </span>
+
+                                <span class="badge bg-dark">
+
+                                    #@ride.Id
+
+                                </span>
+
+                            </div>
+
+                            <!-- LOCATION -->
+                            <div class="fw-semibold mb-1">
+
+                                @ride.PickupLocation
+
+                            </div>
+
+                            <div class="small text-secondary mb-2">
+
+                                to @ride.DropLocation
+
+                            </div>
+
+                            <!-- FOOTER -->
+                            <div class="d-flex justify-content-between align-items-center small text-secondary">
+
+                                <span>
+
+                                    ₹@ride.Fare
+
+                                </span>
+
+                                <span>
+
+                                    @ride.CreatedAt.ToString("hh:mm tt")
+
+                                </span>
+
+                            </div>
+
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="text-secondary">
+
+                        No active rides right now.
+
+                    </div>
+                }
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+@section Scripts {
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+    <script>
+
+        // =============================
+        // Map Init
+        // =============================
+
+        const map =
+            L.map('liveOpsMap')
+            .setView(
+                [20.5937, 78.9629],
+                5);
+
+        // =============================
+        // Tile Layer
+        // =============================
+
+        L.tileLayer(
+            'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+            {
+                attribution:
+                    '&copy; OpenStreetMap & Carto',
+
+                subdomains: 'abcd',
+
+                maxZoom: 20
+            })
+            .addTo(map);
+
+        // =============================
+        // Ride Data
+        // =============================
+
+        const rides =
+            @Html.Raw(JsonSerializer.Serialize(
+                Model.Select(x => new
+                {
+                        x.Id,
+                        x.PickupLocation,
+                        x.DropLocation,
+                        x.PickupLatitude,
+                        x.PickupLongitude,
+                        x.Status
+                })));
+
+    const bounds = [];
+
+    // =============================
+    // Markers
+    // =============================
+
+    rides.forEach(x => {
+
+        if (x.PickupLatitude &&
+            x.PickupLongitude) {
+
+            L.marker([
+                x.PickupLatitude,
+                x.PickupLongitude
+            ])
+            .addTo(map)
+            .bindPopup(`
+                <div>
+                    <strong>Ride #${x.Id}</strong><br/>
+                    ${x.PickupLocation}
+                    →
+                    ${x.DropLocation}<br/>
+                    Status: ${x.Status}
+                </div>
+            `);
+
+            bounds.push([
+                x.PickupLatitude,
+                x.PickupLongitude
+            ]);
+        }
+    });
+
+    // =============================
+    // Auto Fit
+    // =============================
+
+    if (bounds.length > 0) {
+
+        map.fitBounds(
+            bounds,
+            {
+                padding: [40, 40]
+            });
+    }
+
+</script>
+}

@@ -1,0 +1,286 @@
+﻿@model List<Ridex.Models.Ride>
+
+@{
+    ViewData["Title"] = "Rides";
+
+    int totalRides =
+        Model?.Count ?? 0;
+
+    int pendingRides =
+        Model?.Count(x =>
+            x.Status == "Pending") ?? 0;
+
+    int activeRides =
+        Model?.Count(x =>
+            x.Status == "Accepted" ||
+            x.Status == "Started") ?? 0;
+
+    int completedRides =
+        Model?.Count(x =>
+            x.Status == "Completed" ||
+            x.Status == "Paid") ?? 0;
+}
+
+@functions {
+
+    string GetRideBadge(string status)
+    {
+        return status switch
+        {
+            "Pending" =>
+                "bg-warning text-dark",
+
+            "Accepted" =>
+                "bg-info text-dark",
+
+            "Cancelled" =>
+                "bg-danger",
+
+            "Started" =>
+                "bg-primary",
+
+            "Completed" =>
+                "bg-success",
+
+            "Paid" =>
+                "bg-success",
+
+            _ =>
+                "bg-secondary"
+        };
+    }
+}
+
+<!-- STATS -->
+<div class="row g-4 mb-4">
+
+    <div class="col-md-6 col-xl-3">
+
+        <div class="card p-4 h-100">
+
+            <small class="text-secondary">
+                Total Rides
+            </small>
+
+            <h3 class="fw-bold mt-2">
+                @totalRides
+            </h3>
+
+            <small class="text-info">
+                All Bookings
+            </small>
+
+        </div>
+
+    </div>
+
+    <div class="col-md-6 col-xl-3">
+
+        <div class="card p-4 h-100">
+
+            <small class="text-secondary">
+                Pending
+            </small>
+
+            <h3 class="fw-bold mt-2">
+                @pendingRides
+            </h3>
+
+            <small class="text-warning">
+                Waiting
+            </small>
+
+        </div>
+
+    </div>
+
+    <div class="col-md-6 col-xl-3">
+
+        <div class="card p-4 h-100">
+
+            <small class="text-secondary">
+                Active
+            </small>
+
+            <h3 class="fw-bold mt-2">
+                @activeRides
+            </h3>
+
+            <small class="text-primary">
+                On Going
+            </small>
+
+        </div>
+
+    </div>
+
+    <div class="col-md-6 col-xl-3">
+
+        <div class="card p-4 h-100">
+
+            <small class="text-secondary">
+                Completed
+            </small>
+
+            <h3 class="fw-bold mt-2">
+                @completedRides
+            </h3>
+
+            <small class="text-success">
+                Finished
+            </small>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- TABLE -->
+<div class="card p-4">
+
+    <!-- TOP -->
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+
+        <h4 class="fw-bold mb-0">
+            Ride Management
+        </h4>
+
+        <span class="badge bg-warning text-dark">
+
+            @totalRides Total
+
+        </span>
+
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-responsive">
+
+        <table class="table table-hover align-middle mb-0">
+
+            <thead>
+
+                <tr>
+
+                    <th>Ride Id</th>
+
+                    <th>Rider</th>
+
+                    <th>Driver Id</th>
+
+                    <th>Pickup</th>
+
+                    <th>Drop</th>
+
+                    <th>Fare</th>
+
+                    <th>Status</th>
+
+                    <th>Date</th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                @if (Model != null && Model.Any())
+                {
+                    @foreach (var ride in Model)
+                    {
+                        <tr>
+
+                            <!-- RIDE ID -->
+                            <td>
+
+                                #@ride.Id
+
+                            </td>
+
+                            <!-- RIDER -->
+                            <td>
+
+                                @(ride.Rider?.FullName
+                                                        ?? "N/A")
+
+                            </td>
+
+                            <!-- DRIVER -->
+                            <td>
+
+                                @(ride.DriverId != null
+                                                        ? $"#{ride.DriverId}"
+                                                        : "Not Assigned")
+
+                    </td>
+
+                            <!-- PICKUP -->
+                            <td>
+
+                                @ride.PickupLocation
+
+                            </td>
+
+                            <!-- DROP -->
+                            <td>
+
+                                @ride.DropLocation
+
+                            </td>
+
+                            <!-- FARE -->
+                            <td class="fw-bold text-warning">
+
+                                ₹@ride.Fare
+
+                            </td>
+
+                            <!-- STATUS -->
+                            <td>
+
+                                <span class="badge @GetRideBadge(ride.Status)">
+
+                                    @ride.Status
+
+                                </span>
+
+                            </td>
+
+                            <!-- DATE -->
+                            <td>
+
+                                @ride.CreatedAt.ToString("dd MMM yyyy hh:mm tt")
+
+                            </td>
+
+                        </tr>
+                                }
+                }
+                else
+                {
+                    <tr>
+
+                        <td colspan="8"
+                            class="text-center py-5">
+
+                            <i class="fa-solid fa-road fa-2x mb-3 text-secondary"></i>
+
+                            <div class="fw-semibold">
+
+                                No rides found
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+                }
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>

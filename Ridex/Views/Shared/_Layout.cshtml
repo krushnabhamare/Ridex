@@ -1,0 +1,737 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8" />
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0" />
+
+    <title>
+
+        @ViewData["Title"] - Ridex
+
+    </title>
+
+    <!-- CSS -->
+    <link rel="stylesheet"
+          href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+
+    <link rel="stylesheet"
+          href="~/css/site.css"
+          asp-append-version="true" />
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+
+    <style>
+
+        /* =========================
+           DESKTOP SIDEBAR FIX
+        ========================= */
+
+        .admin-sidebar {
+            width: 260px;
+            min-width: 260px;
+            height: 100vh;
+            background: #0b1a2d;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: fixed;
+            left: 0;
+            top: 0;
+            z-index: 1300;
+            overflow-y: auto;
+        }
+
+        /* MAIN CONTENT */
+        .admin-main {
+            margin-left: 260px;
+            width: calc(100% - 260px);
+        }
+
+        /* LOGO */
+        .admin-logo {
+            font-size: 20px;
+            font-weight: bold;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* NAV LINKS */
+        .admin-nav {
+            display: flex;
+            flex-direction: column;
+            margin-top: 10px;
+        }
+
+            .admin-nav a {
+                color: #fff;
+                padding: 12px 20px;
+                text-decoration: none;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                transition: 0.2s;
+            }
+
+                .admin-nav a:hover {
+                    background: rgba(255,255,255,0.1);
+                }
+
+        /* LOGOUT */
+        .admin-logout {
+            padding: 20px;
+        }
+
+            .admin-logout a {
+                color: #fff;
+                text-decoration: none;
+            }
+
+        /* =========================
+           TOAST
+        ========================= */
+
+        .admin-toast-container {
+            z-index: 1080;
+        }
+
+        .admin-toast-body {
+            color: black;
+            border: solid 2px #000;
+        }
+
+        /* =========================
+           MOBILE SIDEBAR
+        ========================= */
+
+        @@media (max-width: 991px) {
+
+            .admin-sidebar {
+                left: -260px; /* FIXED */
+            }
+
+                .admin-sidebar.mobile-open {
+                    left: 0;
+                }
+
+            .admin-main {
+                width: 100%;
+                margin-left: 0 !important;
+            }
+
+            .admin-mobile-toggle {
+                display: flex !important;
+            }
+        }
+
+        /* HIDE TOGGLE ON DESKTOP */
+        @@media (min-width: 992px) {
+            .admin-mobile-toggle {
+                display: none !important;
+            }
+        }
+
+        /* =========================
+           OVERLAY
+        ========================= */
+
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1200;
+            display: none;
+        }
+
+            .sidebar-overlay.active {
+                display: block;
+            }
+
+        /* =========================
+           BODY LOCK
+        ========================= */
+
+        .no-scroll {
+            overflow: hidden;
+        }
+
+    </style>
+
+</head>
+
+<body class="@(User.Identity.IsAuthenticated && User.IsInRole("Admin") ? "admin-dark-layout" : "bg-light")">
+
+    <!-- =============================
+         ADMIN LAYOUT
+    ============================== -->
+    @if (User.Identity.IsAuthenticated &&
+        User.IsInRole("Admin"))
+    {
+        <div class="admin-shell">
+
+            <!-- SIDEBAR -->
+            <aside class="admin-sidebar"
+                   id="adminSidebar">
+
+                <div>
+
+                    <!-- LOGO -->
+                    <div class="admin-logo">
+
+                        <i class="fa-solid fa-car-side"></i>
+
+                        <span>
+
+                            Ridex
+
+                        </span>
+
+                    </div>
+
+                    <!-- NAV -->
+                    <nav class="admin-nav">
+
+                        <a asp-controller="Admin"
+                           asp-action="Dashboard">
+
+                            <i class="fa-solid fa-table-columns"></i>
+
+                            Dashboard
+
+                        </a>
+
+                        <a asp-controller="Admin"
+                           asp-action="LiveOperations">
+
+                            <i class="fa-solid fa-tower-broadcast"></i>
+
+                            Live Operations
+
+                        </a>
+
+                        <a asp-controller="Admin"
+                           asp-action="Users">
+
+                            <i class="fa-solid fa-users"></i>
+
+                            Users
+
+                        </a>
+
+                        <a asp-controller="Admin"
+                           asp-action="Drivers">
+
+                            <i class="fa-solid fa-id-card"></i>
+
+                            Drivers
+
+                        </a>
+
+                        <a asp-controller="Admin"
+                           asp-action="Rides">
+
+                            <i class="fa-solid fa-road"></i>
+
+                            Rides
+
+                        </a>
+
+                        <a asp-controller="Admin"
+                           asp-action="Payments">
+
+                            <i class="fa-solid fa-wallet"></i>
+
+                            Payments
+
+                        </a>
+
+                        <a asp-controller="Admin"
+                           asp-action="Reports">
+
+                            <i class="fa-solid fa-file-lines"></i>
+
+                            Reports
+
+                        </a>
+
+                        <a asp-controller="Admin"
+                           asp-action="Analytics">
+
+                            <i class="fa-solid fa-chart-line"></i>
+
+                            Analytics
+
+                        </a>
+
+                        <a asp-controller="Admin"
+                           asp-action="Notifications">
+
+                            <i class="fa-solid fa-bell"></i>
+
+                            Notifications
+
+                        </a>
+
+                    </nav>
+
+                </div>
+
+                <!-- LOGOUT -->
+                <div class="admin-logout">
+
+                    <a asp-controller="Account"
+                       asp-action="Logout">
+
+                        <i class="fa-solid fa-right-from-bracket"></i>
+
+                        Logout
+
+                    </a>
+
+                </div>
+
+            </aside>
+            <div id="sidebarOverlay" class="sidebar-overlay"></div>
+
+            <!-- MAIN -->
+            <div class="admin-main">
+
+                <!-- TOPBAR -->
+                <header class="admin-topbar">
+
+                    <!-- LEFT -->
+                    <div class="d-flex align-items-center gap-3">
+
+                        <!-- MOBILE TOGGLE -->
+                        <button class="btn btn-outline-light admin-mobile-toggle"
+                                id="adminSidebarToggle">
+
+                            <i class="fa-solid fa-bars"></i>
+
+                        </button>
+
+                        <div>
+
+                            <h4 class="mb-0 fw-bold text-white">
+
+                                @ViewData["Title"]
+
+                            </h4>
+
+                            <small class="text-secondary">
+
+                                Real-time overview of Ridex platform
+
+                            </small>
+
+                        </div>
+
+                    </div>
+
+                    <!-- RIGHT -->
+                    <div class="admin-top-actions">
+
+                        <div class="admin-date-pill">
+
+                            <i class="fa-regular fa-calendar"></i>
+
+                            <span>
+
+                                @DateTime.Now.ToString("MMM dd, yyyy")
+
+                            </span>
+
+                        </div>
+
+                        <div class="admin-avatar">
+
+                            <i class="fa-solid fa-user"></i>
+
+                        </div>
+
+                    </div>
+
+                </header>
+
+                <!-- CONTENT -->
+                <main class="admin-content">
+
+                    @RenderBody()
+
+                </main>
+
+            </div>
+
+            <!-- TOAST -->
+            <div class="position-fixed top-0 end-0 p-3 admin-toast-container">
+
+                <div id="adminEmergencyToast"
+                     class="toast align-items-center text-bg-danger border-0"
+                     role="alert">
+
+                    <div class="d-flex admin-toast-body">
+
+                        <div class="toast-body fw-semibold">
+
+                            Emergency Alert Received
+
+                        </div>
+
+                        <button type="button"
+                                class="btn btn-sm btn-light me-2 m-auto"
+                                onclick="window.location.href='/Admin/Notifications'">
+
+                            Check Notification
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+    }else
+    {
+    <header>
+
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
+
+            <div class="container">
+
+                <!-- LOGO -->
+                <a class="navbar-brand fw-bold"
+                   asp-controller="Home"
+                   asp-action="Index">
+
+                    <i class="fa-solid fa-car-side me-2"></i>
+
+                    Ridex
+
+                </a>
+
+                <!-- TOGGLE -->
+                <button class="navbar-toggler"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#ridexNav">
+
+                    <span class="navbar-toggler-icon"></span>
+
+                </button>
+
+                <!-- NAV -->
+                <div class="collapse navbar-collapse"
+                     id="ridexNav">
+
+                    <!-- LEFT -->
+                    <ul class="navbar-nav me-auto">
+
+                        @if (User.Identity.IsAuthenticated &&
+                                                User.IsInRole("Rider"))
+                        {
+                            <li class="nav-item">
+
+                                <a class="nav-link"
+                                   asp-controller="Rider"
+                                   asp-action="Dashboard">
+
+                                    Dashboard
+
+                                </a>
+
+                            </li>
+
+                            <li class="nav-item">
+
+                                <a class="nav-link"
+                                   asp-controller="Rider"
+                                   asp-action="BookRide">
+
+                                    Book Ride
+
+                                </a>
+
+                            </li>
+
+                            <li class="nav-item">
+
+                                <a class="nav-link"
+                                   asp-controller="Rider"
+                                   asp-action="MyRides">
+
+                                    My Rides
+
+                                </a>
+
+                            </li>
+
+                            <li class="nav-item">
+
+                                <a class="nav-link"
+                                   asp-controller="Rider"
+                                   asp-action="Profile">
+
+                                    My Profile
+
+                                </a>
+
+                            </li>
+                        }
+
+                        @if (User.Identity.IsAuthenticated &&
+                                                User.IsInRole("Driver"))
+                        {
+                            <li class="nav-item">
+
+                                <a class="nav-link"
+                                   asp-controller="Driver"
+                                   asp-action="Dashboard">
+
+                                    Dashboard
+
+                                </a>
+
+                            </li>
+
+                            <li class="nav-item">
+
+                                <a class="nav-link"
+                                   asp-controller="Driver"
+                                   asp-action="RideRequests">
+
+                                    Ride Requests
+
+                                </a>
+
+                            </li>
+
+                            <li class="nav-item">
+
+                                <a class="nav-link"
+                                   asp-controller="Driver"
+                                   asp-action="MyAcceptedRides">
+
+                                    My Rides
+
+                                </a>
+
+                            </li>
+
+                            <li class="nav-item">
+
+                                <a class="nav-link"
+                                   asp-controller="Driver"
+                                   asp-action="Profile">
+
+                                    My Profile
+
+                                </a>
+
+                            </li>
+                        }
+
+                    </ul>
+
+                    <!-- RIGHT -->
+                    <ul class="navbar-nav ms-auto align-items-center">
+
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            <li class="nav-item">
+
+                                <span class="nav-link text-light">
+
+                                    Hi,
+                                    @User.Identity.Name
+
+                                </span>
+
+                            </li>
+
+                            <li class="nav-item">
+
+                                <a class="btn btn-outline-light btn-sm ms-2"
+                                   asp-controller="Account"
+                                   asp-action="Logout">
+
+                                    Logout
+
+                                </a>
+
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+
+                                <a class="btn btn-outline-light btn-sm me-2"
+                                   asp-controller="Account"
+                                   asp-action="Login">
+
+                                    Login
+
+                                </a>
+
+                            </li>
+
+                            <li class="nav-item">
+
+                                <a class="btn btn-light btn-sm"
+                                   asp-controller="Account"
+                                   asp-action="Register">
+
+                                    Register
+
+                                </a>
+
+                            </li>
+                        }
+
+                    </ul>
+
+                </div>
+
+            </div>
+
+        </nav>
+
+    </header>
+
+    <!-- BODY -->
+    <main class="py-4">
+
+        <div class="container">
+
+            @RenderBody()
+
+        </div>
+
+    </main>
+    }
+
+    <!-- =============================
+         SCRIPTS
+    ============================== -->
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js"></script>
+
+    <script>
+
+        // =============================
+        // SignalR Connection
+        // =============================
+
+        const globalRideConnection =
+            new signalR.HubConnectionBuilder()
+            .withUrl("/rideHub")
+            .withAutomaticReconnect()
+            .build();
+
+        // =============================
+        // Emergency Alerts
+        // =============================
+
+        globalRideConnection.on(
+            "EmergencyAlertReceived",
+            function () {
+
+                const toastEl =
+                    document.getElementById(
+                        'adminEmergencyToast');
+
+                if (toastEl) {
+
+                    const toast =
+                        new bootstrap.Toast(
+                            toastEl);
+
+                    toast.show();
+                }
+            });
+
+        // =============================
+        // Ride Requests
+        // =============================
+
+        globalRideConnection.on(
+            "ReceiveRideRequest",
+            function () {
+
+                console.log(
+                    "New ride request.");
+            });
+
+        // =============================
+        // Payment Updates
+        // =============================
+
+        globalRideConnection.on(
+            "PaymentCompleted",
+            function () {
+
+                console.log(
+                    "Payment completed.");
+            });
+
+        // =============================
+        // Start Connection
+        // =============================
+
+        globalRideConnection.start()
+            .catch(err =>
+                console.error(err.toString()));
+
+        // =============================
+        // Admin Sidebar Toggle
+        // =============================
+
+      const sidebarToggle = document.getElementById("adminSidebarToggle");
+const adminSidebar = document.getElementById("adminSidebar");
+const overlay = document.getElementById("sidebarOverlay");
+
+if (sidebarToggle && adminSidebar && overlay) {
+
+    sidebarToggle.addEventListener("click", function () {
+
+        adminSidebar.classList.toggle("mobile-open");
+        overlay.classList.toggle("active");
+
+        // lock scroll
+        document.body.classList.toggle("no-scroll");
+    });
+
+    // click outside close
+    overlay.addEventListener("click", function () {
+
+        adminSidebar.classList.remove("mobile-open");
+        overlay.classList.remove("active");
+        document.body.classList.remove("no-scroll");
+
+    });
+}
+
+    </script>
+
+    @await RenderSectionAsync(
+    "Scripts",
+        required: false)
+
+</body>
+
+</html>

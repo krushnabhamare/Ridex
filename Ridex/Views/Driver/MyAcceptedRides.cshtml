@@ -1,0 +1,453 @@
+﻿@model List<Ridex.Models.Ride>
+
+@{
+    Layout = "~/Views/Shared/_DriverLayout.cshtml";
+
+    ViewData["Title"] = "My Rides";
+
+    int ongoingCount =
+        Model?.Count(x =>
+            x.Status == "Accepted" ||
+            x.Status == "Started") ?? 0;
+
+    int completedCount =
+        Model?.Count(x =>
+            x.Status == "Completed") ?? 0;
+}
+
+@functions {
+
+    string GetRideBadge(string status)
+    {
+        return status switch
+        {
+            "Accepted" =>
+                "bg-info text-dark",
+
+            "Started" =>
+                "bg-success",
+
+            "Completed" =>
+                "bg-warning text-dark",
+
+            _ =>
+                "bg-secondary"
+        };
+    }
+}
+
+<style>
+
+    .myrides-title {
+        color: #fff;
+    }
+
+    .ride-card {
+        border-radius: 18px;
+        transition: 0.2s ease;
+        background: rgba(255,255,255,0.02);
+    }
+
+        .ride-card:hover {
+            transform: translateY(-2px);
+        }
+
+    .driver-avatar {
+        width: 54px;
+        height: 54px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.08);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 18px;
+    }
+
+    .driver-avatar-img {
+        width: 54px;
+        height: 54px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid rgba(255,255,255,0.08);
+    }
+
+    .otp-input {
+        width: 140px;
+        min-height: 42px;
+    }
+
+    .ride-card .btn {
+        min-height: 42px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .ride-card hr {
+        border-color: rgba(255,255,255,0.08);
+    }
+
+    @@media (max-width: 768px) {
+
+        .ride-card {
+            padding: 20px !important;
+        }
+
+        .otp-input {
+            width: 100%;
+        }
+
+        .ride-card .btn,
+        .ride-card form {
+            width: 100%;
+        }
+
+        .ride-card .btn {
+            justify-content: center;
+        }
+    }
+
+</style>
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger border-0 shadow-sm">
+
+        @TempData["Error"]
+
+    </div>
+}
+
+<!-- TOP -->
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+
+    <div>
+
+        <h4 class="fw-bold mb-1 myrides-title">
+
+            My Rides
+
+        </h4>
+
+        <small class="text-secondary">
+
+            Manage ongoing and completed rides
+
+        </small>
+
+    </div>
+
+    <!-- COUNTS -->
+    <div class="d-flex gap-2 flex-wrap">
+
+        <span class="badge bg-warning text-dark px-3 py-2">
+
+            Ongoing (@ongoingCount)
+
+        </span>
+
+        <span class="badge bg-dark px-3 py-2">
+
+            Completed (@completedCount)
+
+        </span>
+
+    </div>
+
+</div>
+
+@if (Model != null && Model.Any())
+{
+    <div class="d-flex flex-column gap-3">
+
+        @foreach (var ride in Model)
+        {
+            bool canCancel =
+            ride.Status == "Accepted" ||
+            ride.Status == "Started";
+
+            <div class="card border-0 shadow-sm p-4 ride-card">
+
+                <!-- TOP -->
+                <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+
+                    <!-- LEFT -->
+                    <div class="d-flex align-items-center gap-3">
+
+                        @if (!string.IsNullOrEmpty(ride.Rider?.ProfilePhoto))
+                        {
+                            <img src="@ride.Rider.ProfilePhoto"
+                                 class="driver-avatar-img"
+                                 alt="Rider" />
+                        }
+                        else
+                        {
+                            <div class="driver-avatar">
+
+                                <i class="fa-solid fa-user"></i>
+
+                            </div>
+                        }
+
+                        <div>
+
+                            <h5 class="fw-bold mb-1">
+
+                                @(ride.Rider?.FullName ?? "Rider")
+
+                            </h5>
+
+                            <div class="text-secondary small">
+
+                                <i class="fa-solid fa-location-dot me-1 text-success"></i>
+
+                                @ride.PickupLocation
+
+                            </div>
+
+                            <div class="text-secondary small mt-1">
+
+                                <i class="fa-solid fa-location-arrow me-1 text-danger"></i>
+
+                                @ride.DropLocation
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <!-- RIGHT -->
+                    <div class="text-lg-end">
+
+                        <div class="fw-bold text-warning fs-5">
+
+                            ₹@ride.Fare
+
+                        </div>
+
+                        <small class="text-secondary d-block">
+
+                            Ride #@ride.Id
+
+                        </small>
+
+                        <small class="text-secondary d-block mt-1">
+
+                            @ride.CreatedAt.ToString("dd MMM yyyy hh:mm tt")
+
+                        </small>
+
+                        <div class="mt-2">
+
+                            <span class="badge @GetRideBadge(ride.Status) px-3 py-2">
+
+                                @ride.Status
+
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- DIVIDER -->
+                <hr class="my-4 opacity-25" />
+
+                <!-- ACTIONS -->
+                <div class="d-flex flex-wrap gap-2 align-items-center">
+
+                    <!-- NAVIGATE -->
+                    <a asp-action="NavigateRide"
+                       asp-route-id="@ride.Id"
+                       class="btn btn-outline-light">
+
+                        <i class="fa-solid fa-location-arrow me-2"></i>
+
+                        Navigate
+
+                    </a>
+
+                    <!-- ACCEPTED -->
+                    @if (ride.Status == "Accepted")
+                    {
+                        <form asp-action="VerifyOtpAndStartRide"
+                              method="post"
+                              class="d-flex gap-2 flex-wrap align-items-center start-form">
+
+                            @Html.AntiForgeryToken()
+
+                            <input type="hidden"
+                                   name="rideId"
+                                   value="@ride.Id" />
+
+                            <input type="text"
+                                   name="enteredOtp"
+                                   class="form-control otp-input"
+                                   placeholder="Enter OTP"
+                                   required />
+
+                            <button type="submit"
+                                    class="btn btn-success start-btn">
+
+                                Start Ride
+
+                            </button>
+
+                        </form>
+                    }
+
+                    <!-- STARTED -->
+                    @if (ride.Status == "Started")
+                    {
+                        <a asp-action="CompleteRide"
+                           asp-route-id="@ride.Id"
+                           class="btn btn-success complete-btn"
+                           onclick="disableComplete(this)">
+
+                            <i class="fa-solid fa-check me-2"></i>
+
+                            Complete Ride
+
+                        </a>
+                    }
+
+                    <!-- COMPLETED -->
+                    @if (ride.Status == "Completed")
+                    {
+                        <form asp-action="ConfirmCashPayment"
+                              method="post"
+                              class="single-submit-form ms-lg-auto">
+
+                            @Html.AntiForgeryToken()
+
+                            <input type="hidden"
+                                   name="rideId"
+                                   value="@ride.Id" />
+
+                            <button type="submit"
+                                    class="btn btn-warning px-3">
+
+                                <i class="fa-solid fa-wallet me-2"></i>
+
+                                Confirm Cash
+
+                            </button>
+
+                        </form>
+                    }
+
+                    <!-- CANCEL -->
+                    @if (canCancel)
+                    {
+                        <form asp-action="CancelAcceptedRide"
+                              method="post"
+                              class="single-submit-form">
+
+                            @Html.AntiForgeryToken()
+
+                            <input type="hidden"
+                                   name="rideId"
+                                   value="@ride.Id" />
+
+                            <button type="submit"
+                                    class="btn btn-outline-danger">
+
+                                <i class="fa-solid fa-xmark me-2"></i>
+
+                                Cancel
+
+                            </button>
+
+                        </form>
+                    }
+
+                </div>
+
+            </div>
+        }
+
+    </div>
+}
+else
+{
+    <div class="card p-5 text-center border-0 shadow-sm">
+
+        <i class="fa-solid fa-route fa-2x mb-3 text-secondary"></i>
+
+        <div class="fw-semibold">
+
+            No active rides
+
+        </div>
+
+        <div class="text-secondary small">
+
+            Accepted rides will appear here.
+
+        </div>
+
+    </div>
+}
+
+@section Scripts {
+
+    <script>
+
+        // =============================
+        // Complete Ride Button
+        // =============================
+
+        function disableComplete(btn) {
+
+            btn.classList.add("disabled");
+
+            btn.innerText =
+                "Completing...";
+        }
+
+        // =============================
+        // OTP Start Forms
+        // =============================
+
+        document
+            .querySelectorAll(".start-form")
+            .forEach(form => {
+
+                form.addEventListener(
+                    "submit",
+                    function () {
+
+                        const btn =
+                            form.querySelector(".start-btn");
+
+                        btn.disabled = true;
+
+                        btn.innerText =
+                            "Starting...";
+                    });
+            });
+
+        // =============================
+        // Single Submit Protection
+        // =============================
+
+        document
+            .querySelectorAll(".single-submit-form")
+            .forEach(form => {
+
+                form.addEventListener(
+                    "submit",
+                    function () {
+
+                        const btn =
+                            form.querySelector("button");
+
+                        btn.disabled = true;
+                    });
+            });
+
+    </script>
+}

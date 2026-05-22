@@ -1,0 +1,347 @@
+﻿@{
+    ViewData["Title"] = "Home";
+
+    Layout = "~/Views/Shared/_LandingLayout.cshtml";
+
+    var stats = new[]
+    {
+        new
+        {
+            Value = "10K+",
+            Label = "Happy Riders"
+        },
+
+        new
+        {
+            Value = "500+",
+            Label = "Professional Drivers"
+        },
+
+        new
+        {
+            Value = "4.8 ★",
+            Label = "User Ratings"
+        }
+    };
+
+    var features = new[]
+    {
+        new
+        {
+            Icon = "fa-bolt",
+            Title = "Instant Booking",
+            Desc = "Book your ride in seconds with fast and seamless flow."
+        },
+
+        new
+        {
+            Icon = "fa-map-location-dot",
+            Title = "Live Tracking",
+            Desc = "Get real-time ride updates and driver actions instantly."
+        },
+
+        new
+        {
+            Icon = "fa-wallet",
+            Title = "Secure Payments",
+            Desc = "Fast, safe and flexible payment experience for every ride."
+        }
+    };
+
+    var userTypes = new[]
+    {
+        new
+        {
+            Title = "For Riders",
+            Desc = "Book quick rides, track live updates, pay easily and travel smarter every day.",
+            Btn = "Ride with Ridex"
+        },
+
+        new
+        {
+            Title = "For Drivers",
+            Desc = "Accept ride requests, complete trips and manage earnings with ease.",
+            Btn = "Drive with Ridex"
+        }
+    };
+}
+
+<style>
+
+    .landing-white-title {
+        color: #fff;
+    }
+
+</style>
+
+<div class="ridex-landing">
+
+    <!-- HERO -->
+    <section class="hero-section">
+
+        <div class="container">
+
+            <!-- NAVBAR -->
+            <nav class="landing-navbar">
+
+                <!-- LOGO -->
+                <a asp-controller="Home"
+                   asp-action="Index"
+                   class="landing-logo text-decoration-none">
+
+                    RIDE<span>X</span>
+
+                </a>
+
+                <!-- ACTIONS -->
+                <div class="landing-nav-actions">
+
+                    <a asp-controller="Account"
+                       asp-action="Login"
+                       class="nav-login">
+
+                        Login
+
+                    </a>
+
+                    <a asp-controller="Account"
+                       asp-action="Register"
+                       class="nav-signup">
+
+                        Sign Up
+
+                    </a>
+
+                </div>
+
+            </nav>
+
+            <!-- HERO CONTENT -->
+            <div class="row align-items-center hero-content"
+                 id="home">
+
+                <!-- LEFT -->
+                <div class="col-lg-6">
+
+                    <span class="hero-tag">
+
+                        Your Ride, Your Way
+
+                    </span>
+
+                    <h1 class="hero-title">
+
+                        Move Better.<br />
+
+                        Go <span>Anywhere.</span>
+
+                    </h1>
+
+                    <p class="hero-subtitle">
+
+                        Experience comfortable, reliable and affordable rides
+                        with real-time tracking and professional drivers.
+
+                    </p>
+
+                    <!-- BUTTONS -->
+                    <div class="hero-actions d-flex flex-wrap gap-3">
+
+                        <a asp-controller="Account"
+                           asp-action="Register"
+                           class="hero-btn-primary">
+
+                            Book a Ride
+
+                            <i class="fa-solid fa-arrow-right"></i>
+
+                        </a>
+
+                        <a href="#features"
+                           class="hero-btn-secondary">
+
+                            Learn More
+
+                        </a>
+
+                    </div>
+
+                    <!-- STATS -->
+                    <div class="hero-stats">
+
+                        @foreach (var stat in stats)
+                        {
+                            <div>
+
+                                <h4 class="landing-white-title">
+
+                                    @stat.Value
+
+                                </h4>
+
+                                <span>
+
+                                    @stat.Label
+
+                                </span>
+
+                            </div>
+                        }
+
+                    </div>
+
+                </div>
+
+                <!-- RIGHT -->
+                <div class="col-lg-6">
+
+                    <div class="hero-visual">
+
+                        <div class="hero-glow-ring"></div>
+
+                        <!-- TRACKING -->
+                        <div class="tracking-card">
+
+                            <h6>
+
+                                Live Tracking
+
+                            </h6>
+
+                            <small>
+
+                                Driver is 2 min away
+
+                            </small>
+
+                            <i class="fa-solid fa-car-side"></i>
+
+                        </div>
+
+                        <!-- CAR -->
+                        <div class="hero-car">
+
+                            <img src="~/images/landing-car.png"
+                                 alt="Ridex Car" />
+
+                        </div>
+
+                        <!-- PIN -->
+                        <div class="map-pin">
+
+                            <i class="fa-solid fa-location-dot"></i>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- FEATURES -->
+    <section class="why-section"
+             id="features">
+
+        <div class="container">
+
+            <!-- HEADING -->
+            <div class="section-heading text-center">
+
+                <h2 class="landing-white-title">
+
+                    Why Choose Ridex?
+
+                </h2>
+
+                <p>
+
+                    Built for riders, drivers and modern mobility.
+
+                </p>
+
+            </div>
+
+            <!-- CARDS -->
+            <div class="row g-4">
+
+                @foreach (var item in features)
+                {
+                    <div class="col-md-4">
+
+                        <div class="why-card h-100">
+
+                            <i class="fa-solid @item.Icon"></i>
+
+                            <h5 class="landing-white-title">
+
+                                @item.Title
+
+                            </h5>
+
+                            <p>
+
+                                @item.Desc
+
+                            </p>
+
+                        </div>
+
+                    </div>
+                }
+
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- USER TYPES -->
+    <section class="user-section"
+             id="about">
+
+        <div class="container">
+
+            <div class="row g-4">
+
+                @foreach (var item in userTypes)
+                {
+                    <div class="col-md-6">
+
+                        <div class="user-card h-100">
+
+                            <h3 class="landing-white-title">
+
+                                @item.Title
+
+                            </h3>
+
+                            <p>
+
+                                @item.Desc
+
+                            </p>
+
+                            <a asp-controller="Account"
+                               asp-action="Register">
+
+                                @item.Btn
+
+                            </a>
+
+                        </div>
+
+                    </div>
+                }
+
+            </div>
+
+        </div>
+
+    </section>
+
+</div>

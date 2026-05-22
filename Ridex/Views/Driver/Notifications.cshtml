@@ -1,0 +1,36 @@
+﻿@model List<string>
+
+@{
+    Layout = "~/Views/Shared/_DriverLayout.cshtml";
+    ViewData["Title"] = "Notifications";
+}
+
+<div class="card p-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="fw-bold mb-1">Notifications</h4>
+            <small class="text-secondary">Driver alerts and recent activity</small>
+        </div>
+        <span class="badge bg-info text-dark">Live</span>
+    </div>
+
+@if (Model != null && Model.Any())
+{
+        <div class="d-flex flex-column gap-3">
+            @foreach (var item in Model)
+            {
+                <div class="p-3 rounded-4" style="background: rgba(255,255,255,0.04);">
+                    <div class="fw-semibold">@item</div>
+                </div>
+            }
+        </div>
+}
+else
+{
+        <div class="text-center py-5">
+            <i class="fa-solid fa-bell-slash fa-2x mb-3 text-secondary"></i>
+            <div class="fw-semibold">No notifications</div>
+            <div class="text-secondary small">New driver alerts will appear here.</div>
+        </div>
+}
+    

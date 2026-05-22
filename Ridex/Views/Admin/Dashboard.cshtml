@@ -1,0 +1,303 @@
+﻿@model List<Ridex.Models.Ride>
+@using System.Text.Json
+
+@{
+    ViewData["Title"] = "Operations Dashboard";
+
+    int completedCount = Model.Count(x => x.Status == "Completed" || x.Status == "Paid");
+    int startedCount = Model.Count(x => x.Status == "Started");
+    int acceptedCount = Model.Count(x => x.Status == "Accepted");
+    int pendingCount = Model.Count(x => x.Status == "Pending");
+    int cancelledCount = Model.Count(x => x.Status == "Cancelled");
+}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+
+<style>
+    /* make both right cards equal height */
+.col-lg-4.d-flex {
+    gap: 16px;
+}
+
+/* ensure map stretches */
+.col-lg-8.d-flex .card {
+    height: 100%;
+}
+
+/* chart center fix */
+canvas {
+    max-height: 180px !important;
+}
+
+/* feed scroll */
+.feed-scroll {
+    overflow-y: auto;
+    flex: 1;
+}
+    .card {
+        border-radius: 16px;
+    }
+
+    .admin-stat-card {
+        height: 100%;
+        transition: 0.2s;
+    }
+
+    .admin-stat-card:hover {
+        transform: translateY(-3px);
+    }
+
+    #adminLiveMap {
+        /* height: 280px; */
+        height: 630px;
+        border-radius: 16px;
+    }
+
+    @@media (max-width: 768px) {
+        #adminLiveMap {
+            height: 240px;
+        }
+    }
+
+    .activity-feed-item {
+        padding-bottom: 12px;
+        border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .activity-feed-item:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+</style>
+
+<!-- TOP STATS -->
+<div class="row g-4 mb-2">
+
+    @* CARD *@
+    <div class="col-md-6 col-xl-3">
+        <div class="card p-4 admin-stat-card">
+            <small class="text-secondary">Live Rides</small>
+            <div class="d-flex justify-content-between mt-2">
+                <h2>@ViewBag.LiveRides</h2>
+                <i class="fa-solid fa-car-side text-primary"></i>
+            </div>
+            <small class="text-secondary">Currently Active</small>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-xl-3">
+        <div class="card p-4 admin-stat-card">
+            <small class="text-secondary">Online Drivers</small>
+            <div class="d-flex justify-content-between mt-2">
+                <h2>@ViewBag.OnlineDrivers</h2>
+                <i class="fa-solid fa-user text-success"></i>
+            </div>
+            <small class="text-secondary">Available Now</small>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-xl-3">
+        <div class="card p-4 admin-stat-card">
+            <small class="text-secondary">Pending Requests</small>
+            <div class="d-flex justify-content-between mt-2">
+                <h2>@ViewBag.PendingRequests</h2>
+                <i class="fa-solid fa-bell text-warning"></i>
+            </div>
+            <small class="text-secondary">Waiting</small>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-xl-3">
+        <div class="card p-4 admin-stat-card">
+            <small class="text-secondary">Today's Revenue</small>
+            <div class="d-flex justify-content-between mt-2">
+                <h2>₹@ViewBag.DailyRevenue</h2>
+                <i class="fa-solid fa-indian-rupee-sign text-warning"></i>
+            </div>
+            <small class="text-secondary">Completed Today</small>
+        </div>
+    </div>
+
+</div>
+
+<!-- MAP + RIGHT -->
+<div class="row g-4 mt-2">
+
+    <!-- MAP -->
+    <div class="col-lg-8 d-flex">
+        <div class="card p-3 w-100 d-flex flex-column">
+            <h5 class="fw-bold mb-2">Live Activity Map</h5>
+            <div id="adminLiveMap"></div>
+        </div>
+    </div>
+
+    <!-- RIGHT -->
+    <div class="col-lg-4 d-flex flex-column" style="height:100%;">
+
+        <!-- CHART -->
+        <div class="card p-4 flex-fill mb-3 d-flex flex-column">
+            <h5 class="fw-bold mb-2">Ride Status</h5>
+            <canvas id="rideStatusChart" height="200"></canvas>
+        </div>
+
+        <!-- FEED -->
+        <div class="card p-4 flex-fill overflow-auto d-flex flex-column">
+            <h5 class="fw-bold mb-3">Live Activity Feed</h5>
+
+            <div class="d-flex flex-column gap-3 feed-scroll">
+                @if (Model.Any())
+                {
+                    foreach (var ride in Model.Take(5))
+                    {
+                        <div class="d-flex justify-content-between activity-feed-item">
+                            <div>
+                                <div class="fw-semibold">@ride.Status Ride</div>
+                                <small class="text-secondary">
+                                    @ride.PickupLocation → @ride.DropLocation
+                                </small>
+                            </div>
+                            <small class="text-secondary">
+                                @ride.CreatedAt.ToString("hh:mm tt")
+                            </small>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <small class="text-secondary">No activity</small>
+                }
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<!-- BOTTOM STATS -->
+<div class="row g-4 mt-3">
+
+    <div class="col-md-6 col-xl-3">
+        <div class="card p-4 admin-stat-card">
+            <small class="text-secondary">Today's Rides</small>
+            <h2>@ViewBag.TotalDailyRides</h2>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-xl-3">
+        <div class="card p-4 admin-stat-card">
+            <small class="text-secondary">Completed</small>
+            <h2>@ViewBag.CompletedRides</h2>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-xl-3">
+        <div class="card p-4 admin-stat-card">
+            <small class="text-secondary">Cancelled</small>
+            <h2>@ViewBag.CancelledRides</h2>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-xl-3">
+        <div class="card p-4 admin-stat-card">
+            <small class="text-secondary">Success Rate</small>
+            <h2>@ViewBag.SuccessRate%</h2>
+        </div>
+    </div>
+
+</div>
+
+@section Scripts {
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script>
+    const map = L.map('adminLiveMap').setView([20.5937, 78.9629], 5);
+
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; OpenStreetMap',
+        maxZoom: 20
+    }).addTo(map);
+
+    // ✅ ONLY Started, Accepted, Pending rides
+    const rides = @Html.Raw(JsonSerializer.Serialize(
+        Model
+        .Where(x => x.Status == "Started" || x.Status == "Accepted" || x.Status == "Pending")
+        .Select(x => new {
+            x.Id,
+            x.Status,
+            x.PickupLocation,
+            x.DropLocation,
+            x.PickupLatitude,
+            x.PickupLongitude
+        })
+    ));
+
+    const bounds = [];
+
+    rides.forEach(x => {
+
+        if (x.PickupLatitude && x.PickupLongitude) {
+
+            // 🎨 color based on status
+            let color = "blue";
+
+            if (x.Status === "Started") color = "green";
+            else if (x.Status === "Accepted") color = "orange";
+            else if (x.Status === "Pending") color = "yellow";
+
+            // 🔥 circle marker (better than default marker)
+            const marker = L.circleMarker(
+                [x.PickupLatitude, x.PickupLongitude],
+                {
+                    radius: 8,
+                    fillColor: color,
+                    color: "#fff",
+                    weight: 1,
+                    fillOpacity: 0.9
+                }
+            ).addTo(map);
+
+            // 🧠 popup info
+            marker.bindPopup(`
+                <div style="font-size:13px">
+                    <b>Ride #${x.Id}</b><br/>
+                    Status: ${x.Status}<br/>
+                    ${x.PickupLocation} → ${x.DropLocation}
+                </div>
+            `);
+
+            bounds.push([x.PickupLatitude, x.PickupLongitude]);
+        }
+    });
+
+    // 🔍 auto zoom
+    if (bounds.length > 0) {
+        map.fitBounds(bounds, { padding: [40, 40] });
+    }
+
+    // 📊 Chart (same)
+    new Chart(document.getElementById('rideStatusChart'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Completed','Started','Accepted','Pending','Cancelled'],
+            datasets: [{
+                data: [
+                    @completedCount,
+                    @startedCount,
+                    @acceptedCount,
+                    @pendingCount,
+                    @cancelledCount
+                ]
+            }]
+        },
+        options: {
+            plugins: {
+                legend: {
+                    labels: { color: '#fff' }
+                }
+            }
+        }
+    });
+</script>
+}

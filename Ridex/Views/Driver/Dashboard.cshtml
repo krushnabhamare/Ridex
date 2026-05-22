@@ -1,0 +1,503 @@
+﻿@model List<Ridex.Models.Ride>
+
+@{
+    ViewData["Title"] = "Driver Dashboard";
+
+    Layout = "~/Views/Shared/_DriverLayout.cshtml";
+
+    var activeRide =
+        Model?.FirstOrDefault(x =>
+            x.Status == "Accepted" ||
+            x.Status == "Started");
+
+    int pendingCount =
+        Model?.Count(x =>
+            x.Status == "Pending") ?? 0;
+}
+
+<style>
+
+    .dashboard-stat-card {
+        height: 100%;
+    }
+
+    .dashboard-soft-box {
+        background: rgba(255,255,255,0.04);
+        border-radius: 18px;
+    }
+
+    .dashboard-action-box {
+        border-radius: 18px;
+        transition: 0.2s ease;
+        height: 100%;
+    }
+
+        .dashboard-action-box:hover {
+            transform: translateY(-2px);
+        }
+
+    .dashboard-action-yellow {
+        background: rgba(250,204,21,0.10);
+    }
+
+    .dashboard-action-blue {
+        background: rgba(59,130,246,0.10);
+    }
+
+    .dashboard-action-purple {
+        background: rgba(168,85,247,0.10);
+    }
+
+    .dashboard-action-green {
+        background: rgba(34,197,94,0.10);
+    }
+
+</style>
+
+<!-- TOP STATS -->
+<div class="row g-3 mb-4">
+
+    <!-- TODAY -->
+    <div class="col-md-6 col-xl-3">
+
+        <div class="card p-3 dashboard-stat-card">
+
+            <small class="text-secondary">
+                Today's Earnings
+            </small>
+
+            <h3 class="fw-bold mt-2 text-warning">
+
+                ₹@ViewBag.TodayEarnings
+
+            </h3>
+
+            <small class="text-secondary">
+                Live today earnings
+            </small>
+
+        </div>
+
+    </div>
+
+    <!-- COMPLETED -->
+    <div class="col-md-6 col-xl-3">
+
+        <div class="card p-3 dashboard-stat-card">
+
+            <small class="text-secondary">
+                Completed Rides
+            </small>
+
+            <h3 class="fw-bold mt-2">
+
+                @ViewBag.CompletedRides
+
+            </h3>
+
+            <small class="text-secondary">
+                Total completed rides
+            </small>
+
+        </div>
+
+    </div>
+
+    <!-- ACTIVE -->
+    <div class="col-md-6 col-xl-3">
+
+        <div class="card p-3 dashboard-stat-card">
+
+            <small class="text-secondary">
+                Active Rides
+            </small>
+
+            <h3 class="fw-bold mt-2">
+
+                @ViewBag.ActiveRides
+
+            </h3>
+
+            <small class="text-secondary">
+                Accepted & ongoing rides
+            </small>
+
+        </div>
+
+    </div>
+
+    <!-- TOTAL -->
+    <div class="col-md-6 col-xl-3">
+
+        <div class="card p-3 dashboard-stat-card">
+
+            <small class="text-secondary">
+                Total Earnings
+            </small>
+
+            <h3 class="fw-bold mt-2 text-warning">
+
+                ₹@ViewBag.TotalEarnings
+
+            </h3>
+
+            <small class="text-secondary">
+                Lifetime earnings
+            </small>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- MAIN -->
+<div class="row g-4">
+
+    <!-- LEFT -->
+    <div class="col-lg-7">
+
+        <div class="card p-4 h-100">
+
+            <!-- HEADER -->
+            <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+
+                <div>
+
+                    <h5 class="fw-bold mb-1">
+                        Today's Overview
+                    </h5>
+
+                    <small class="text-secondary">
+                        Current active trip and quick status
+                    </small>
+
+                </div>
+
+                <span class="badge bg-success">
+
+                    Online
+
+                </span>
+
+            </div>
+
+            <!-- ACTIVE RIDE -->
+            @if (activeRide != null)
+            {
+                <div class="p-3 dashboard-soft-box mb-3">
+
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+
+                        <div>
+
+                            <span class="badge bg-success mb-2">
+
+                                Active Ride
+
+                            </span>
+
+                            <div class="fw-semibold">
+
+                                @(activeRide.Rider?.FullName ?? "Rider")
+
+                            </div>
+
+                            <small class="text-secondary">
+
+                                Ride #@activeRide.Id
+
+                            </small>
+
+                        </div>
+
+                        <i class="fa-solid fa-chevron-right text-secondary"></i>
+
+                    </div>
+
+                    <div class="small text-secondary mb-1">
+
+                        @activeRide.PickupLocation
+
+                    </div>
+
+                    <div class="small text-success mb-3">
+
+                        @activeRide.Status
+
+                    </div>
+
+                    <a asp-action="NavigateRide"
+                       asp-route-id="@activeRide.Id"
+                       class="btn btn-warning w-100">
+
+                        Navigate
+
+                    </a>
+
+                </div>
+            }
+            else
+            {
+                <div class="p-4 dashboard-soft-box mb-3 text-center">
+
+                    <div class="fw-semibold">
+
+                        No active ride
+
+                    </div>
+
+                    <small class="text-secondary">
+
+                        Accept a new ride request to begin
+
+                    </small>
+
+                </div>
+            }
+
+            <!-- QUICK ACTIONS -->
+            <div class="row g-3">
+
+                <!-- REQUESTS -->
+                <div class="col-6">
+
+                    <a asp-action="RideRequests"
+                       class="text-decoration-none">
+
+                        <div class="p-3 text-center dashboard-action-box dashboard-action-yellow">
+
+                            <i class="fa-solid fa-car-side text-warning mb-2"></i>
+
+                            <div class="fw-semibold small">
+
+                                Ride Requests
+
+                            </div>
+
+                            <small class="text-secondary">
+
+                                @pendingCount Pending
+
+                            </small>
+
+                        </div>
+
+                    </a>
+
+                </div>
+
+                <!-- RIDES -->
+                <div class="col-6">
+
+                    <a asp-action="MyAcceptedRides"
+                       class="text-decoration-none">
+
+                        <div class="p-3 text-center dashboard-action-box dashboard-action-blue">
+
+                            <i class="fa-solid fa-road text-info mb-2"></i>
+
+                            <div class="fw-semibold small">
+
+                                My Rides
+
+                            </div>
+
+                            <small class="text-secondary">
+
+                                @ViewBag.ActiveRides Active
+
+                            </small>
+
+                        </div>
+
+                    </a>
+
+                </div>
+
+                <!-- EARNINGS -->
+                <div class="col-6">
+
+                    <a asp-action="Earnings"
+                       class="text-decoration-none">
+
+                        <div class="p-3 text-center dashboard-action-box dashboard-action-purple">
+
+                            <i class="fa-solid fa-wallet text-light mb-2"></i>
+
+                            <div class="fw-semibold small text-light">
+
+                                Earnings
+
+                            </div>
+
+                        </div>
+
+                    </a>
+
+                </div>
+
+                <!-- HISTORY -->
+                <div class="col-6">
+
+                    <a asp-action="RideHistory"
+                       class="text-decoration-none">
+
+                        <div class="p-3 text-center dashboard-action-box dashboard-action-green">
+
+                            <i class="fa-solid fa-clock-rotate-left text-success mb-2"></i>
+
+                            <div class="fw-semibold small">
+
+                                History
+
+                            </div>
+
+                        </div>
+
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- RIGHT -->
+    <div class="col-lg-5">
+
+        <div class="card p-4 h-100">
+
+            <!-- TOP -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+
+                <h5 class="fw-bold mb-0">
+
+                    Quick Stats
+
+                </h5>
+
+                <span class="badge bg-dark">
+
+                    Live
+
+                </span>
+
+            </div>
+
+            <!-- STATS -->
+            <div class="d-flex flex-column gap-3">
+
+                <div class="p-3 dashboard-soft-box">
+
+                    <div class="small text-secondary">
+
+                        Pending Requests
+
+                    </div>
+
+                    <div class="fw-bold fs-4">
+
+                        @pendingCount
+
+                    </div>
+
+                </div>
+
+                <div class="p-3 dashboard-soft-box">
+
+                    <div class="small text-secondary">
+
+                        Active Rides
+
+                    </div>
+
+                    <div class="fw-bold fs-4">
+
+                        @ViewBag.ActiveRides
+
+                    </div>
+
+                </div>
+
+                <div class="p-3 dashboard-soft-box">
+
+                    <div class="small text-secondary">
+
+                        Completed Rides
+
+                    </div>
+
+                    <div class="fw-bold fs-4">
+
+                        @ViewBag.CompletedRides
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+@section Scripts {
+
+    <script>
+
+        // =============================
+        // Live Driver Location
+        // =============================
+
+        function sendLiveLocation() {
+
+            // Skip when tab inactive
+            if (document.hidden)
+                return;
+
+            if (!navigator.geolocation)
+                return;
+
+            navigator.geolocation.getCurrentPosition(
+
+                function (position) {
+
+                    $.post(
+                        '/Driver/UpdateLiveLocation',
+                        {
+                            latitude:
+                                position.coords.latitude,
+
+                            longitude:
+                                position.coords.longitude
+                        });
+                },
+
+                function () {
+
+                    console.warn(
+                        "Location access denied.");
+                },
+
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 0
+                });
+        }
+
+        // Initial Call
+        sendLiveLocation();
+
+        // Update Every 15 Seconds
+        setInterval(
+            sendLiveLocation,
+            15000);
+
+    </script>
+}

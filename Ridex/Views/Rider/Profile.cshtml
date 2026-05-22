@@ -1,0 +1,326 @@
+﻿@model Ridex.Models.ApplicationUser
+
+@{
+    ViewData["Title"] = "My Profile";
+
+    Layout = "~/Views/Shared/_RiderLayout.cshtml";
+}
+
+<style>
+
+    .profile-avatar {
+        width: 120px;
+        height: 120px;
+        object-fit: cover;
+    }
+
+    .profile-avatar-placeholder {
+        width: 120px;
+        height: 120px;
+    }
+
+    .success-alert {
+        color: #000;
+    }
+
+</style>
+
+<div class="row g-4">
+
+    <!-- LEFT -->
+    <div class="col-lg-8">
+
+        <div class="card p-4 shadow-sm border-0">
+
+            <!-- HEADER -->
+            <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+
+                <div>
+
+                    <h3 class="fw-bold mb-1">
+
+                        My Profile
+
+                    </h3>
+
+                    <small class="text-secondary">
+
+                        Manage your personal information
+
+                    </small>
+
+                </div>
+
+                <div class="driver-icon-btn">
+
+                    <i class="fa-solid fa-user"></i>
+
+                </div>
+
+            </div>
+
+            <!-- ALERT -->
+            @if (TempData["Success"] != null)
+            {
+                <div class="alert alert-success border-0 shadow-sm success-alert">
+
+                    @TempData["Success"]
+
+                </div>
+            }
+
+            <!-- FORM -->
+            <form asp-action="UpdateProfile"
+                  method="post"
+                  enctype="multipart/form-data"
+                  id="profileForm">
+
+                <!-- AVATAR -->
+                <div class="text-center mb-4">
+
+                    @if (!string.IsNullOrEmpty(Model.ProfilePhoto))
+                    {
+                        <img src="@Model.ProfilePhoto"
+                             id="profilePreview"
+                             class="rounded-circle shadow-sm profile-avatar" />
+                    }
+                    else
+                    {
+                        <div id="profilePlaceholder"
+                             class="rounded-circle bg-dark d-inline-flex align-items-center justify-content-center profile-avatar-placeholder">
+
+                            <i class="fa-solid fa-user text-white fa-2x"></i>
+
+                        </div>
+
+                        <img id="profilePreview"
+                             class="rounded-circle shadow-sm profile-avatar d-none" />
+                    }
+
+                </div>
+
+                <!-- PHOTO -->
+                <div class="mb-4">
+
+                    <label class="form-label fw-semibold">
+
+                        Profile Photo
+
+                    </label>
+
+                    <input type="file"
+                           name="ProfileImage"
+                           class="form-control"
+                           id="profileImageInput"
+                           accept="image/*" />
+
+                    <small class="text-secondary">
+
+                        JPG, PNG or WEBP recommended.
+
+                    </small>
+
+                </div>
+
+                <!-- NAME -->
+                <div class="mb-3">
+
+                    <label class="form-label fw-semibold">
+
+                        Full Name
+
+                    </label>
+
+                    <input name="FullName"
+                           value="@Model.FullName"
+                           class="form-control form-control-lg" />
+
+                </div>
+
+                <!-- EMAIL -->
+                <div class="mb-3">
+
+                    <label class="form-label fw-semibold">
+
+                        Email
+
+                    </label>
+
+                    <input value="@Model.Email"
+                           class="form-control form-control-lg"
+                           readonly />
+
+                    <small class="text-secondary">
+
+                        Email cannot be changed.
+
+                    </small>
+
+                </div>
+
+                <!-- PHONE -->
+                <div class="mb-4">
+
+                    <label class="form-label fw-semibold">
+
+                        Phone Number
+
+                    </label>
+
+                    <input name="PhoneNumber"
+                           value="@Model.PhoneNumber"
+                           class="form-control form-control-lg" />
+
+                </div>
+
+                <!-- SUBMIT -->
+                <button type="submit"
+                        class="btn btn-warning px-4 fw-semibold"
+                        id="profileSaveBtn">
+
+                    Update Profile
+
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+    <!-- RIGHT -->
+    <div class="col-lg-4">
+
+        <!-- RIDES -->
+        <div class="card p-4 mb-4 text-center shadow-sm border-0">
+
+            <div class="driver-icon-btn mx-auto mb-3">
+
+                <i class="fa-solid fa-road"></i>
+
+            </div>
+
+            <h6 class="text-secondary">
+
+                Total Rides
+
+            </h6>
+
+            <h3 class="fw-bold">
+
+                @ViewBag.TotalRides
+
+            </h3>
+
+        </div>
+
+        <!-- SPENT -->
+        <div class="card p-4 text-center shadow-sm border-0">
+
+            <div class="driver-icon-btn mx-auto mb-3">
+
+                <i class="fa-solid fa-wallet"></i>
+
+            </div>
+
+            <h6 class="text-secondary">
+
+                Total Spent
+
+            </h6>
+
+            <h3 class="fw-bold text-warning">
+
+                ₹@ViewBag.TotalSpent
+
+            </h3>
+
+        </div>
+
+    </div>
+
+</div>
+
+@section Scripts {
+
+    <script>
+
+        // =============================
+        // Cached Elements
+        // =============================
+
+        const profileForm =
+            document.getElementById(
+                "profileForm");
+
+        const profileSaveBtn =
+            document.getElementById(
+                "profileSaveBtn");
+
+        const profileImageInput =
+            document.getElementById(
+                "profileImageInput");
+
+        const profilePreview =
+            document.getElementById(
+                "profilePreview");
+
+        const profilePlaceholder =
+            document.getElementById(
+                "profilePlaceholder");
+
+        // =============================
+        // Image Preview
+        // =============================
+
+        profileImageInput.addEventListener(
+            "change",
+            function (event) {
+
+                const file =
+                    event.target.files[0];
+
+                if (!file)
+                    return;
+
+                const reader =
+                    new FileReader();
+
+                reader.onload =
+                    function (e) {
+
+                        profilePreview.src =
+                            e.target.result;
+
+                        profilePreview.classList.remove(
+                            "d-none");
+
+                        if (profilePlaceholder) {
+
+                            profilePlaceholder.classList.add(
+                                "d-none");
+                        }
+                    };
+
+                reader.readAsDataURL(file);
+            });
+
+        // =============================
+        // Submit Protection
+        // =============================
+
+        profileForm.addEventListener(
+            "submit",
+            function () {
+
+                if (profileSaveBtn.disabled)
+                    return false;
+
+                profileSaveBtn.disabled = true;
+
+                profileSaveBtn.innerHTML =
+                    '<i class="fa-solid fa-spinner fa-spin me-2"></i>Updating...';
+            });
+
+    </script>
+}

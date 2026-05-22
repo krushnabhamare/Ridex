@@ -1,0 +1,88 @@
+﻿@model Ridex.ViewModels.LoginViewModel
+
+@{
+    ViewData["Title"] = "Login";
+    Layout = "~/Views/Shared/_LandingLayout.cshtml";
+}
+
+<div class="auth-shell">
+    <div class="auth-card-wrap">
+
+        <div class="auth-left-panel">
+            <a asp-controller="Home" asp-action="Index" class="auth-brand text-decoration-none">
+                RIDE<span>X</span>
+            </a>
+
+            <div class="auth-left-content">
+                <h1>Ride Smarter<br />with <span>Ridex</span></h1>
+
+                <p>
+                    Fast, safe and reliable rides at your fingertips.
+                    Book in seconds, travel in comfort.
+                </p>
+
+                <div class="auth-benefits">
+                    <div><i class="fa-solid fa-circle-check"></i> Instant Ride Booking</div>
+                    <div><i class="fa-solid fa-circle-check"></i> Real-Time Driver Tracking</div>
+                    <div><i class="fa-solid fa-circle-check"></i> Safe & Secure Payments</div>
+                </div>
+            </div>
+
+            <div class="auth-car-image">
+                <img src="~/images/landing-car.png" alt="Ridex Car" />
+            </div>
+        </div>
+
+        <div class="auth-right-panel">
+            <div class="auth-form-card">
+                <div class="auth-form-logo">
+                    <i class="fa-solid fa-car-side"></i>
+                </div>
+
+                <h2>Hello Again!</h2>
+                <p>Welcome back, please login to your account.</p>
+
+                <form asp-action="Login" method="post" class="auth-form">
+                    <div asp-validation-summary="All" class="text-danger small mb-3"></div>
+
+                    <div class="auth-input-group">
+                        <i class="fa-regular fa-envelope"></i>
+                        <input asp-for="Email" type="email" placeholder="Email" />
+                    </div>
+
+                    <div class="auth-input-group">
+                        <i class="fa-solid fa-lock"></i>
+                        <input asp-for="Password" type="password" placeholder="Password" />
+                    </div>
+
+                    <div class="auth-meta">
+                        <label class="remember-check">
+                            <input type="checkbox" />
+                            <span>Remember me</span>
+                        </label>
+
+                        <div class="text-end mb-3">
+                            <a asp-action="ForgotPassword"
+                               class="text-warning text-decoration-none">
+                                Forgot Password?
+                            </a>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="auth-btn">
+                        Login
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+
+                    <div class="auth-divider"></div>
+
+                    <div class="auth-footer-link">
+                        Don’t have an account?
+                        <a asp-action="Register">Create one</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>

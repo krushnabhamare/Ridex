@@ -1,0 +1,422 @@
+﻿@model List<Ridex.Models.Payment>
+
+@using System.Text.Json
+
+@{
+    Layout = "~/Views/Shared/_DriverLayout.cshtml";
+
+    ViewData["Title"] = "Earnings";
+
+    decimal total =
+        Model?.Sum(x =>
+            x.Amount) ?? 0;
+
+    decimal today =
+        Model?
+        .Where(x =>
+            x.PaymentDate.Date == DateTime.Today)
+        .Sum(x =>
+            x.Amount) ?? 0;
+
+    int totalTrips =
+        Model?.Count ?? 0;
+
+    decimal avgTrip =
+        totalTrips > 0
+        ? Math.Round(total / totalTrips, 2)
+        : 0;
+
+    // =============================
+    // Last 7 Days
+    // =============================
+
+    var last7Days =
+        Enumerable.Range(0, 7)
+        .Select(i =>
+            DateTime.Today.AddDays(-6 + i))
+        .ToList();
+
+    var chartLabels =
+        last7Days
+        .Select(x =>x.ToString("dd MMM")).ToList();
+
+    var chartData =
+        last7Days
+        .Select(day =>
+            Model?
+            .Where(x =>
+                x.PaymentDate.Date == day.Date)
+            .Sum(x =>
+                x.Amount) ?? 0)
+        .ToList();
+}
+
+@functions {
+
+    string GetPaymentStatus(string status)
+    {
+        return status switch
+        {
+            "Paid" =>
+                "text-success",
+
+            "Pending" =>
+                "text-warning",
+
+            _ =>
+                "text-secondary"
+        };
+    }
+}
+
+<style>
+
+    .earnings-chart-container {
+        height: 220px;
+    }
+
+    .earning-history-card {
+        background: rgba(255,255,255,0.04);
+    }
+
+</style>
+
+<!-- TOP -->
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+
+    <div>
+
+        <h4 class="fw-bold mb-1 text-light">
+
+            Earnings
+
+        </h4>
+
+        <small class="text-secondary">
+
+            Track your earnings and payout history
+
+        </small>
+
+    </div>
+
+    <!-- BADGES -->
+    <div class="d-flex gap-2 flex-wrap">
+
+        <span class="badge bg-warning text-dark px-3 py-2">
+
+            Live
+
+        </span>
+
+        <span class="badge bg-dark px-3 py-2">
+
+            @totalTrips Trips
+
+        </span>
+
+    </div>
+
+</div>
+
+<!-- STATS -->
+<div class="row g-4 mb-4">
+
+    <!-- CHART -->
+    <div class="col-lg-8">
+
+        <div class="card p-4 h-100">
+
+            <small class="text-secondary">
+
+                Today's Earnings
+
+            </small>
+
+            <h2 class="fw-bold text-warning mt-2">
+
+                ₹@today
+
+            </h2>
+
+            <small class="text-secondary">
+
+                Last 7 days performance
+
+            </small>
+
+            <!-- CHART -->
+            <div class="mt-4 earnings-chart-container">
+
+                <canvas id="earningsChart"></canvas>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- SUMMARY -->
+    <div class="col-lg-4">
+
+        <div class="card p-4 h-100">
+
+            <h6 class="fw-bold mb-4">
+
+                Summary
+
+            </h6>
+
+            <!-- TODAY -->
+            <div class="d-flex justify-content-between py-2 border-bottom border-secondary-subtle">
+
+                <span class="text-secondary">
+
+                    Today
+
+                </span>
+
+                <span class="fw-semibold">
+
+                    ₹@today
+
+                </span>
+
+            </div>
+
+            <!-- TOTAL -->
+            <div class="d-flex justify-content-between py-2 border-bottom border-secondary-subtle">
+
+                <span class="text-secondary">
+
+                    Total Earnings
+
+                </span>
+
+                <span class="fw-semibold">
+
+                    ₹@total
+
+                </span>
+
+            </div>
+
+            <!-- TRIPS -->
+            <div class="d-flex justify-content-between py-2 border-bottom border-secondary-subtle">
+
+                <span class="text-secondary">
+
+                    Paid Trips
+
+                </span>
+
+                <span class="fw-semibold">
+
+                    @totalTrips
+
+                </span>
+
+            </div>
+
+            <!-- AVG -->
+            <div class="d-flex justify-content-between py-3">
+
+                <span class="text-secondary">
+
+                    Avg / Trip
+
+                </span>
+
+                <span class="fw-bold text-warning">
+
+                    ₹@avgTrip
+
+                </span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- HISTORY -->
+<div class="card p-4">
+
+    <!-- TOP -->
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+
+        <h5 class="fw-bold mb-0">
+
+            Earnings History
+
+        </h5>
+
+        <span class="badge bg-warning text-dark">
+
+            @totalTrips Trips
+
+        </span>
+
+    </div>
+
+    <!-- LIST -->
+    <div class="d-flex flex-column gap-3">
+
+        @if (Model != null && Model.Any())
+        {
+            @foreach (var item in Model.Take(10))
+            {
+                <div class="d-flex justify-content-between align-items-center p-3 rounded-4 earning-history-card">
+
+                    <!-- LEFT -->
+                    <div>
+
+                        <div class="fw-semibold">
+
+                            Ride #@item.RideId
+
+                        </div>
+
+                        <small class="text-secondary">
+
+                            @item.PaymentDate.ToString("dd MMM yyyy hh:mm tt")
+
+                        </small>
+
+                    </div>
+
+                    <!-- RIGHT -->
+                    <div class="text-end">
+
+                        <div class="fw-bold text-warning">
+
+                            ₹@item.Amount
+
+                        </div>
+
+                        <small class="@GetPaymentStatus(item.PaymentStatus)">
+
+                            @item.PaymentStatus
+
+                        </small>
+
+                    </div>
+
+                </div>
+            }
+        }
+        else
+        {
+            <div class="text-center py-5">
+
+                <i class="fa-solid fa-wallet fa-2x mb-3 text-secondary"></i>
+
+                <div class="fw-semibold">
+
+                    No earnings found
+
+                </div>
+
+                <small class="text-secondary">
+
+                    Completed paid rides will appear here.
+
+                </small>
+
+            </div>
+        }
+
+    </div>
+
+</div>
+
+@section Scripts {
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+
+        // =============================
+        // Earnings Chart
+        // =============================
+
+        const ctx =
+            document.getElementById(
+                'earningsChart');
+
+        new Chart(ctx, {
+
+            type: 'line',
+
+            data: {
+
+                labels:
+                    @Html.Raw(JsonSerializer.Serialize(chartLabels)),
+
+                datasets: [{
+
+                    data:
+                        @Html.Raw(JsonSerializer.Serialize(chartData)),
+
+                    borderColor:
+                        '#facc15',
+
+                    backgroundColor:
+                        'rgba(250,204,21,0.08)',
+
+                    tension: 0.4,
+
+                    fill: true,
+
+                    pointBackgroundColor:
+                        '#facc15',
+
+                    pointBorderColor:
+                        '#facc15'
+                }]
+            },
+
+            options: {
+
+                responsive: true,
+
+                maintainAspectRatio: false,
+
+                plugins: {
+
+                    legend: {
+                        display: false
+                    }
+                },
+
+                scales: {
+
+                    x: {
+
+                        ticks: {
+                            color: '#94a3b8'
+                        },
+
+                        grid: {
+                            color: 'rgba(255,255,255,0.04)'
+                        }
+                    },
+
+                    y: {
+
+                        ticks: {
+                            color: '#94a3b8'
+                        },
+
+                        grid: {
+                            color: 'rgba(255,255,255,0.04)'
+                        }
+                    }
+                }
+            }
+        });
+
+    </script>
+}

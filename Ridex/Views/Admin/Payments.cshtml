@@ -1,0 +1,326 @@
+﻿@model List<Ridex.Models.Payment>
+
+@{
+    ViewData["Title"] = "Payments";
+
+    decimal totalRevenue =
+        Model?.Where(x =>
+            x.PaymentStatus == "Paid")
+        .Sum(x => x.Amount) ?? 0;
+
+    int totalPaid =
+        Model?.Count(x =>
+            x.PaymentStatus == "Paid") ?? 0;
+
+    int cashCount =
+        Model?.Count(x =>
+            x.PaymentMethod == "Cash") ?? 0;
+
+    int upiCount =
+        Model?.Count(x =>
+            x.PaymentMethod == "UPI") ?? 0;
+
+    int totalTransactions =
+        Model?.Count ?? 0;
+}
+
+@functions {
+
+    string GetMethodBadge(string method)
+    {
+        return method switch
+        {
+            "Cash" =>
+                "bg-secondary",
+
+            "UPI" =>
+                "bg-info text-dark",
+
+            "Card" =>
+                "bg-primary",
+
+            _ =>
+                "bg-dark"
+        };
+    }
+
+    string GetStatusBadge(string status)
+    {
+        return status switch
+        {
+            "Paid" =>
+                "bg-success",
+
+            "Pending" =>
+                "bg-secondary",
+
+            _ =>
+                "bg-dark"
+        };
+    }
+}
+
+<!-- STATS -->
+<div class="row g-4 mb-4">
+
+    <div class="col-md-6 col-xl-3">
+
+        <div class="card p-4 h-100">
+
+            <small class="text-secondary">
+                Total Revenue
+            </small>
+
+            <h3 class="fw-bold mt-2 text-warning">
+
+                ₹@totalRevenue
+
+            </h3>
+
+            <small class="text-success">
+                +12.4%
+            </small>
+
+        </div>
+
+    </div>
+
+    <div class="col-md-6 col-xl-3">
+
+        <div class="card p-4 h-100">
+
+            <small class="text-secondary">
+                Paid Transactions
+            </small>
+
+            <h3 class="fw-bold mt-2">
+
+                @totalPaid
+
+            </h3>
+
+            <small class="text-success">
+                Successful
+            </small>
+
+        </div>
+
+    </div>
+
+    <div class="col-md-6 col-xl-3">
+
+        <div class="card p-4 h-100">
+
+            <small class="text-secondary">
+                Cash Payments
+            </small>
+
+            <h3 class="fw-bold mt-2">
+
+                @cashCount
+
+            </h3>
+
+            <small class="text-secondary">
+                Offline
+            </small>
+
+        </div>
+
+    </div>
+
+    <div class="col-md-6 col-xl-3">
+
+        <div class="card p-4 h-100">
+
+            <small class="text-secondary">
+                UPI Payments
+            </small>
+
+            <h3 class="fw-bold mt-2">
+
+                @upiCount
+
+            </h3>
+
+            <small class="text-info">
+                Digital
+            </small>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- TABLE -->
+<div class="card p-4">
+
+    <!-- TOP -->
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+
+        <h4 class="fw-bold mb-0">
+            Payment Transactions
+        </h4>
+
+        <div class="d-flex gap-2">
+
+            <!-- FILTER -->
+            <select id="paymentFilter" class="form-select form-select-sm" style="width:150px;">
+                <option value="All" style="color:black">All</option>
+                <option value="Cash" style="color:black">Cash</option>
+                <option value="UPI" style="color:black">UPI</option>
+                <option value="Card" style="color:black">Card</option>
+            </select>
+
+            <!-- COUNT -->
+            <span class="badge bg-warning text-dark d-flex align-items-center px-3">
+                @totalTransactions Transactions
+            </span>
+
+        </div>
+
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-responsive">
+
+        <table class="table table-hover align-middle mb-0">
+
+            <thead>
+
+                <tr>
+
+                    <th>Payment Id</th>
+
+                    <th>Ride Id</th>
+
+                    <th>Amount</th>
+
+                    <th>Method</th>
+
+                    <th>Status</th>
+
+                    <th>Date</th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                @if (Model != null && Model.Any())
+                {
+                    @foreach (var payment in Model)
+                    {
+                        <tr data-method="@payment.PaymentMethod">
+
+                            <!-- PAYMENT ID -->
+                            <td>
+
+                                #@payment.Id
+
+                            </td>
+
+                            <!-- RIDE ID -->
+                            <td>
+
+                                #@payment.RideId
+
+                            </td>
+
+                            <!-- AMOUNT -->
+                            <td class="fw-bold text-warning">
+
+                                ₹@payment.Amount
+
+                            </td>
+
+                            <!-- METHOD -->
+                            <td>
+
+                                <span class="badge @GetMethodBadge(payment.PaymentMethod)">
+
+                                    @payment.PaymentMethod
+
+                                </span>
+
+                            </td>
+
+                            <!-- STATUS -->
+                            <td>
+
+                                <span class="badge @GetStatusBadge(payment.PaymentStatus)">
+
+                                    @payment.PaymentStatus
+
+                                </span>
+
+                            </td>
+
+                            <!-- DATE -->
+                            <td>
+
+                                @payment.PaymentDate.ToString("dd MMM yyyy hh:mm tt")
+
+                            </td>
+
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+
+                        <td colspan="6"
+                            class="text-center py-5">
+
+                            <i class="fa-solid fa-wallet fa-2x mb-3 text-secondary"></i>
+
+                            <div class="fw-semibold">
+
+                                No payments found
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+                }
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+@section Scripts {
+
+    <script>
+
+        const filter = document.getElementById("paymentFilter");
+        const rows = document.querySelectorAll("tbody tr");
+
+        filter.addEventListener("change", function () {
+
+            const selected = this.value;
+
+            rows.forEach(row => {
+
+                const method = row.getAttribute("data-method");
+
+                if (selected === "All" || method === selected) {
+                    row.style.display = "";
+                } else {
+                    row.style.display = "none";
+                }
+
+            });
+
+        });
+
+    </script>
+
+}

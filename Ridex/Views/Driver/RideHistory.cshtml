@@ -1,0 +1,215 @@
+﻿@model List<Ridex.Models.Ride>
+
+@{
+    Layout = "~/Views/Shared/_DriverLayout.cshtml";
+
+    ViewData["Title"] = "Ride History";
+
+    int totalTrips =
+        Model?.Count ?? 0;
+}
+
+@functions {
+
+    string GetRideBadge(string status)
+    {
+        return status switch
+        {
+            "Completed" =>
+                "bg-success",
+
+            "Paid" =>
+                "bg-warning text-dark",
+
+            _ =>
+                "bg-secondary"
+        };
+    }
+}
+
+<style>
+
+    .history-avatar-img {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid rgba(255,255,255,0.08);
+    }
+
+</style>
+
+<!-- TOP -->
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+
+    <div>
+
+        <h4 class="fw-bold mb-1 text-light">
+
+            Ride History
+
+        </h4>
+
+        <small class="text-secondary">
+
+            Completed and paid ride history
+
+        </small>
+
+    </div>
+
+    <!-- COUNT -->
+    <span class="badge bg-warning text-dark px-3 py-2">
+
+        @totalTrips Trips
+
+    </span>
+
+</div>
+
+@if (Model != null && Model.Any())
+{
+    <div class="d-flex flex-column gap-3">
+
+        @foreach (var ride in Model)
+        {
+            <div class="card p-3">
+
+                <!-- TOP -->
+                <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+
+                    <!-- LEFT -->
+                    <div class="d-flex align-items-center gap-3">
+
+                        @if (!string.IsNullOrEmpty(ride.Rider?.ProfilePhoto))
+                        {
+                            <img src="@ride.Rider.ProfilePhoto"
+                                 class="history-avatar-img"
+                                 alt="Rider" />
+                        }
+                        else
+                        {
+                            <div class="driver-avatar history-avatar">
+
+                                <i class="fa-solid fa-user"></i>
+
+                            </div>
+                        }
+
+                        <div>
+
+                            <div class="fw-semibold">
+
+                                @(ride.Rider?.FullName ?? "Rider")
+
+                            </div>
+
+                            <small class="text-secondary d-block">
+
+                                @ride.PickupLocation
+
+                            </small>
+
+                            <small class="text-secondary d-block">
+
+                                @ride.DropLocation
+
+                            </small>
+
+                        </div>
+
+                    </div>
+
+                    <!-- RIGHT -->
+                    <div class="text-end">
+
+                        <div class="fw-bold text-warning">
+
+                            ₹@ride.Fare
+
+                        </div>
+
+                        <small class="text-secondary">
+
+                            @ride.CreatedAt.ToString("dd MMM yyyy  hh:mm tt")
+
+                        </small>
+
+                    </div>
+
+                </div>
+
+                <!-- FOOTER -->
+                <div class="d-flex justify-content-between align-items-center mt-3 flex-wrap gap-2">
+
+                    <!-- META -->
+                    <div class="d-flex gap-3 small flex-wrap">
+
+                        <span>
+
+                            <span class="text-secondary">
+
+                                Ride Id:
+
+                            </span>
+
+                            <strong>
+
+                                #@ride.Id
+
+                            </strong>
+
+                        </span>
+
+                        <span>
+
+                            <span class="text-secondary">
+
+                                Status:
+
+                            </span>
+
+                            <strong>
+
+                                @ride.Status
+
+                            </strong>
+
+                        </span>
+
+                    </div>
+
+                    <!-- BADGE -->
+                    <span class="badge @GetRideBadge(ride.Status) px-3 py-2">
+
+                        @ride.Status
+
+                    </span>
+
+                </div>
+
+            </div>
+        }
+
+    </div>
+}
+else
+{
+    <div class="card p-5 text-center">
+
+        <i class="fa-solid fa-clock-rotate-left fa-2x mb-3 text-secondary"></i>
+
+        <div class="fw-semibold">
+
+            No ride history found
+
+        </div>
+
+        <div class="text-secondary small">
+
+            Completed rides will appear here.
+
+        </div>
+
+    </div>
+}

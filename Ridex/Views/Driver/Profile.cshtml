@@ -1,0 +1,480 @@
+﻿@model Ridex.Models.ApplicationUser
+
+@{
+    Layout = "~/Views/Shared/_DriverLayout.cshtml";
+
+    var driver =
+        ViewBag.DriverInfo as Ridex.Models.Driver;
+
+    ViewData["Title"] = "Driver Profile";
+
+    var quickActions = new[]
+    {
+        new
+        {
+            Action = "Earnings",
+            Icon = "fa-wallet",
+            IconClass = "text-warning",
+            BgClass = "quick-bg-warning",
+            Label = "Earnings"
+        },
+
+        new
+        {
+            Action = "RideHistory",
+            Icon = "fa-clock-rotate-left",
+            IconClass = "text-info",
+            BgClass = "quick-bg-info",
+            Label = "Ride History"
+        },
+
+        new
+        {
+            Action = "Settings",
+            Icon = "fa-gear",
+            IconClass = "text-success",
+            BgClass = "quick-bg-success",
+            Label = "Settings"
+        }
+    };
+}
+
+<style>
+
+    .driver-profile-avatar {
+        width: 120px;
+        height: 120px;
+        object-fit: cover;
+        border: 4px solid rgba(255,255,255,0.08);
+    }
+
+    .driver-profile-placeholder {
+        width: 120px;
+        height: 120px;
+    }
+
+    .success-alert {
+        color: #000;
+    }
+
+    .quick-bg-warning {
+        background: rgba(250,204,21,0.10);
+    }
+
+    .quick-bg-info {
+        background: rgba(59,130,246,0.10);
+    }
+
+    .quick-bg-success {
+        background: rgba(34,197,94,0.10);
+    }
+
+    .quick-action-card {
+        transition: 0.2s ease;
+    }
+
+        .quick-action-card:hover {
+            transform: translateY(-3px);
+        }
+
+</style>
+
+<div class="row g-4">
+
+    <!-- LEFT -->
+    <div class="col-lg-4">
+
+        <div class="card p-4 text-center h-100 border-0 shadow-sm">
+
+            <!-- PROFILE -->
+            <div class="mb-3">
+
+                @if (!string.IsNullOrEmpty(Model.ProfilePhoto))
+                {
+                    <img src="@Model.ProfilePhoto"
+                         id="driverProfilePreview"
+                         class="rounded-circle shadow driver-profile-avatar" />
+                }
+                else
+                {
+                    <div id="driverProfilePlaceholder"
+                         class="rounded-circle bg-dark d-inline-flex align-items-center justify-content-center shadow driver-profile-placeholder">
+
+                        <i class="fa-solid fa-user text-white fa-3x"></i>
+
+                    </div>
+
+                    <img id="driverProfilePreview"
+                         class="rounded-circle shadow driver-profile-avatar d-none" />
+                }
+
+            </div>
+
+            <!-- NAME -->
+            <h4 class="fw-bold mb-1">
+
+                @Model.FullName
+
+            </h4>
+
+            <small class="text-secondary d-block mb-3">
+
+                Ridex Driver Partner
+
+            </small>
+
+            <!-- STATUS -->
+            <span class="badge @(driver?.IsAvailable == true ? "bg-success" : "bg-secondary") px-3 py-2">
+
+                @(driver?.IsAvailable == true ? "Online" : "Offline")
+
+            </span>
+
+            <!-- STATS -->
+            <div class="mt-4 pt-4 border-top border-secondary-subtle text-start">
+
+                <div class="d-flex justify-content-between py-2">
+
+                    <span class="text-secondary">
+
+                        Driver Id
+
+                    </span>
+
+                    <span class="fw-semibold">
+
+                        #@(driver?.Id ?? 0)
+
+                    </span>
+
+                </div>
+
+                <div class="d-flex justify-content-between py-2">
+
+                    <span class="text-secondary">
+
+                        Completed Trips
+
+                    </span>
+
+                    <span class="fw-semibold">
+
+                        @ViewBag.TotalRides
+
+                    </span>
+
+                </div>
+
+                <div class="d-flex justify-content-between py-2">
+
+                    <span class="text-secondary">
+
+                        Total Earnings
+
+                    </span>
+
+                    <span class="fw-semibold text-warning">
+
+                        ₹@ViewBag.TotalEarnings
+
+                    </span>
+
+                </div>
+
+                <div class="d-flex justify-content-between py-2">
+
+                    <span class="text-secondary">
+
+                        License Status
+
+                    </span>
+
+                    <span class="fw-semibold @(driver?.IsApproved == true ? "text-success" : "text-warning")">
+
+                        @(driver?.IsApproved == true ? "Approved" : "Pending")
+
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- RIGHT -->
+    <div class="col-lg-8">
+
+        <!-- FORM CARD -->
+        <div class="card p-4 border-0 shadow-sm">
+
+            <!-- HEADER -->
+            <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+
+                <div>
+
+                    <h4 class="fw-bold mb-1">
+
+                        Personal Information
+
+                    </h4>
+
+                    <small class="text-secondary">
+
+                        Manage your driver account details
+
+                    </small>
+
+                </div>
+
+            </div>
+
+            <!-- ALERT -->
+            @if (TempData["Success"] != null)
+            {
+                <div class="alert alert-success border-0 shadow-sm success-alert" style="color:black">
+                    @TempData["Success"]
+                </div>
+            }
+
+            @if (driver != null &&
+                        !driver.IsProfileSubmitted)
+            {
+                <div class="alert alert-warning border-0 shadow-sm success-alert">
+
+                    Please complete your profile and add your license number
+                    to submit for admin approval.
+
+                </div>
+            }
+
+            <!-- FORM -->
+            <form asp-action="UpdateProfile"
+                  method="post"
+                  enctype="multipart/form-data"
+                  id="driverProfileForm">
+
+                <!-- PHOTO -->
+                <div class="mb-4">
+
+                    <label class="form-label fw-semibold">
+
+                        Profile Photo
+
+                    </label>
+
+                    <input type="file"
+                           name="ProfileImage"
+                           class="form-control form-control-lg"
+                           id="driverProfileInput"
+                           accept="image/*" />
+
+                </div>
+
+                <!-- NAME -->
+                <div class="mb-3">
+
+                    <label class="form-label fw-semibold">
+
+                        Full Name
+
+                    </label>
+
+                    <input name="FullName"
+                           value="@Model.FullName"
+                           class="form-control form-control-lg" />
+
+                </div>
+
+                <!-- EMAIL -->
+                <div class="mb-3">
+
+                    <label class="form-label fw-semibold">
+
+                        Email Address
+
+                    </label>
+
+                    <input value="@Model.Email"
+                           class="form-control form-control-lg"
+                           readonly />
+
+                </div>
+
+                <!-- PHONE -->
+                <div class="mb-3">
+
+                    <label class="form-label fw-semibold">
+
+                        Phone Number
+
+                    </label>
+
+                    <input name="PhoneNumber"
+                           value="@Model.PhoneNumber"
+                           class="form-control form-control-lg" />
+
+                </div>
+
+                <!-- LICENSE -->
+                <div class="mb-4">
+
+                    <label class="form-label fw-semibold">
+
+                        License Number
+
+                    </label>
+
+                    <input name="LicenseNumber"
+                           value="@driver?.LicenseNumber"
+                           class="form-control form-control-lg"
+                           required />
+
+                    <small class="text-secondary">
+
+                        Enter your valid driving license number.
+
+                    </small>
+
+                </div>
+
+                <!-- BUTTON -->
+                <button type="submit"
+                        class="btn btn-warning px-4 py-2 fw-semibold"
+                        id="driverProfileSaveBtn">
+
+                    Update Profile
+
+                </button>
+
+            </form>
+
+        </div>
+
+        <!-- QUICK ACTIONS -->
+        <div class="card p-4 mt-4 border-0 shadow-sm">
+
+            <h5 class="fw-bold mb-3">
+
+                Quick Actions
+
+            </h5>
+
+            <div class="row g-3">
+
+                @foreach (var item in quickActions)
+                {
+                    <div class="col-md-4">
+
+                        <a asp-action="@item.Action"
+                           class="text-decoration-none">
+
+                            <div class="p-3 rounded-4 text-center quick-action-card @item.BgClass">
+
+                                <i class="fa-solid @item.Icon @item.IconClass mb-2 fa-lg"></i>
+
+                                <div class="fw-semibold small text-light">
+
+                                    @item.Label
+
+                                </div>
+
+                            </div>
+
+                        </a>
+
+                    </div>
+                }
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+@section Scripts {
+
+    <script>
+
+        // =============================
+        // Cached Elements
+        // =============================
+
+        const driverProfileForm =
+            document.getElementById(
+                "driverProfileForm");
+
+        const driverProfileSaveBtn =
+            document.getElementById(
+                "driverProfileSaveBtn");
+
+        const driverProfileInput =
+            document.getElementById(
+                "driverProfileInput");
+
+        const driverProfilePreview =
+            document.getElementById(
+                "driverProfilePreview");
+
+        const driverProfilePlaceholder =
+            document.getElementById(
+                "driverProfilePlaceholder");
+
+        // =============================
+        // Image Preview
+        // =============================
+
+        driverProfileInput.addEventListener(
+            "change",
+            function (event) {
+
+                const file =
+                    event.target.files[0];
+
+                if (!file)
+                    return;
+
+                const reader =
+                    new FileReader();
+
+                reader.onload =
+                    function (e) {
+
+                        driverProfilePreview.src =
+                            e.target.result;
+
+                        driverProfilePreview.classList.remove(
+                            "d-none");
+
+                        if (driverProfilePlaceholder) {
+
+                            driverProfilePlaceholder.classList.add(
+                                "d-none");
+                        }
+                    };
+
+                reader.readAsDataURL(file);
+            });
+
+        // =============================
+        // Submit Protection
+        // =============================
+
+        driverProfileForm.addEventListener(
+            "submit",
+            function () {
+
+                if (driverProfileSaveBtn.disabled)
+                    return false;
+
+                driverProfileSaveBtn.disabled = true;
+
+                driverProfileSaveBtn.innerHTML =
+                    '<i class="fa-solid fa-spinner fa-spin me-2"></i>Updating...';
+            });
+
+    </script>
+}

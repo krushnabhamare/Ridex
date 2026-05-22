@@ -1,0 +1,294 @@
+﻿@model List<Ridex.Models.EmergencyAlert>
+
+@{
+    ViewData["Title"] = "Notifications";
+
+    int totalAlerts =
+        Model?.Count ?? 0;
+
+    int unreadAlerts =
+        Model?.Count(x =>
+            !x.IsRead) ?? 0;
+
+    int readAlerts =
+        Model?.Count(x =>
+            x.IsRead) ?? 0;
+}
+
+<style>
+
+    .alert-card {
+        border-left: 4px solid #ef4444;
+    }
+
+    .alert-meta {
+        font-size: 13px;
+    }
+
+</style>
+
+<!-- STATS -->
+<div class="row g-4 mb-4">
+
+    <div class="col-md-4">
+
+        <div class="card p-4 h-100">
+
+            <small class="text-secondary">
+
+                Total Alerts
+
+            </small>
+
+            <h3 class="fw-bold mt-2 text-danger">
+
+                @totalAlerts
+
+            </h3>
+
+            <small class="text-danger">
+
+                Emergency Requests
+
+            </small>
+
+        </div>
+
+    </div>
+
+    <div class="col-md-4">
+
+        <div class="card p-4 h-100">
+
+            <small class="text-secondary">
+
+                Unread Alerts
+
+            </small>
+
+            <h3 class="fw-bold mt-2 text-warning">
+
+                @unreadAlerts
+
+            </h3>
+
+            <small class="text-warning">
+
+                Pending Attention
+
+            </small>
+
+        </div>
+
+    </div>
+
+    <div class="col-md-4">
+
+        <div class="card p-4 h-100">
+
+            <small class="text-secondary">
+
+                Resolved Alerts
+
+            </small>
+
+            <h3 class="fw-bold mt-2 text-success">
+
+                @readAlerts
+
+            </h3>
+
+            <small class="text-success">
+
+                Marked Read
+
+            </small>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- ALERTS -->
+<div class="card p-4">
+
+    <!-- TOP -->
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+
+        <h4 class="fw-bold mb-0">
+
+            Emergency Notifications
+
+        </h4>
+
+        <span class="badge bg-danger">
+
+            @totalAlerts Alerts
+
+        </span>
+
+    </div>
+
+    @if (Model != null && Model.Any())
+    {
+        <div class="d-flex flex-column gap-3">
+
+            @foreach (var alert in Model)
+            {
+                <div class="card p-3 border-0 shadow-sm alert-card">
+
+                    <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+
+                        <!-- LEFT -->
+                        <div>
+
+                            <div class="fw-bold text-danger">
+
+                                @(alert.RiderName ?? "Unknown Rider")
+
+                            </div>
+
+                            <div>
+
+                                @(alert.RiderPhone ?? "No Phone")
+
+                            </div>
+
+                            <div class="small text-secondary alert-meta">
+
+                                Ride #@alert.RideId
+
+                            </div>
+
+                            <div class="small mt-2">
+
+                                @alert.Message
+
+                            </div>
+
+                            <div class="small text-secondary mt-2 alert-meta">
+
+                                @alert.CreatedAt.ToString("dd MMM yyyy hh:mm tt")
+
+                            </div>
+
+                        </div>
+
+                        <!-- RIGHT -->
+                        <div class="d-flex flex-column gap-2">
+
+                            @if (!alert.IsRead)
+                            {
+                                <form asp-action="MarkAlertRead"
+                                      method="post">
+
+                                    @Html.AntiForgeryToken()
+
+                                    <input type="hidden"
+                                           name="id"
+                                           value="@alert.Id" />
+
+                                    <button class="btn btn-sm btn-warning w-100">
+
+                                        Mark Read
+
+                                    </button>
+
+                                </form>
+                            }
+                            else
+                            {
+                                <span class="badge bg-success text-center py-2">
+
+                                    Read
+
+                                </span>
+                            }
+
+                            <form asp-action="ClearAlert"
+                                  method="post">
+
+                                @Html.AntiForgeryToken()
+
+                                <input type="hidden"
+                                       name="id"
+                                       value="@alert.Id" />
+
+                                <button class="btn btn-sm btn-outline-danger w-100">
+
+                                    Clear Alert
+
+                                </button>
+
+                            </form>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            }
+
+        </div>
+    }
+    else
+    {
+        <div class="text-center py-5">
+
+            <i class="fa-solid fa-bell-slash fa-2x mb-3 text-secondary"></i>
+
+            <div class="fw-semibold">
+
+                No emergency alerts
+
+            </div>
+
+            <small class="text-secondary">
+
+                New emergency notifications will appear here.
+
+            </small>
+
+        </div>
+    }
+
+</div>
+
+@section Scripts {
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js"></script>
+
+    <script>
+
+        // =============================
+        // SignalR Connection
+        // =============================
+
+        const notificationConnection =
+            new signalR.HubConnectionBuilder()
+            .withUrl("/rideHub")
+            .withAutomaticReconnect()
+            .build();
+
+        // =============================
+        // Emergency Alerts
+        // =============================
+
+        notificationConnection.on(
+            "EmergencyAlertReceived",
+            function () {
+
+                location.reload();
+            });
+
+        // =============================
+        // Start Connection
+        // =============================
+
+        notificationConnection.start()
+            .catch(err =>
+                console.error(err.toString()));
+
+    </script>
+}

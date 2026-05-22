@@ -1,0 +1,422 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>@ViewData["Title"] - Ridex Driver</title>
+
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+
+    <link rel="stylesheet"
+          href="~/css/site.css"
+          asp-append-version="true" />
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+<style>
+        .driver-top-profile-img {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid rgba(255,255,255,0.08);
+        }
+</style>
+
+</head>
+
+<body class="driver-dark-layout">
+
+    @{
+        var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+        var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+
+        string IsActive(string controller, string action)
+        {
+            return currentController == controller &&
+            currentAction == action
+            ? "active"
+            : "";
+        }
+    }
+
+    <div class="driver-shell">
+
+        <!-- Sidebar -->
+        <aside class="driver-sidebar d-none d-lg-flex">
+
+            <div>
+
+                <div class="driver-logo mb-4">
+                    <span>Ride<span>X</span></span>
+                </div>
+
+                <nav class="driver-nav">
+
+                    <a class="@IsActive("Driver", "Dashboard")"
+                       asp-controller="Driver"
+                       asp-action="Dashboard">
+                        <i class="fa-solid fa-table-columns"></i>
+                        Dashboard
+                    </a>
+
+                    <a class="@IsActive("Driver", "RideRequests") @IsActive("Driver", "RideRequestsMap")"
+                       asp-controller="Driver"
+                       asp-action="RideRequests">
+                        <i class="fa-solid fa-bell"></i>
+                        Ride Requests
+                    </a>
+
+                    <a class="@IsActive("Driver", "MyAcceptedRides") @IsActive("Driver", "NavigateRide")"
+                       asp-controller="Driver"
+                       asp-action="MyAcceptedRides">
+                        <i class="fa-solid fa-road"></i>
+                        My Rides
+                    </a>
+
+                    <a class="@IsActive("Driver", "RideHistory")"
+                       asp-controller="Driver"
+                       asp-action="RideHistory">
+                        <i class="fa-solid fa-clock-rotate-left"></i>
+                        Ride History
+                    </a>
+
+                    <a class="@IsActive("Driver", "Earnings")"
+                       asp-controller="Driver"
+                       asp-action="Earnings">
+                        <i class="fa-solid fa-wallet"></i>
+                        Earnings
+                    </a>
+
+                    <a class="@IsActive("Driver", "Profile")"
+                       asp-controller="Driver"
+                       asp-action="Profile">
+                        <i class="fa-solid fa-user"></i>
+                        Profile
+                    </a>
+
+                    <a class="@IsActive("Driver", "Notifications")"
+                       asp-controller="Driver"
+                       asp-action="Notifications">
+                        <i class="fa-solid fa-bell-concierge"></i>
+                        Notifications
+                    </a>
+
+                    <a class="@IsActive("Driver", "Settings")"
+                       asp-controller="Driver"
+                       asp-action="Settings">
+                        <i class="fa-solid fa-gear"></i>
+                        Settings
+                    </a>
+
+                </nav>
+
+            </div>
+
+            <!-- Logout -->
+            <div class="driver-logout">
+
+                <a asp-controller="Account"
+                   asp-action="Logout">
+
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    Logout
+
+                </a>
+
+            </div>
+
+        </aside>
+
+        <!-- Main -->
+        <main class="driver-main">
+
+            <!-- Topbar -->
+            <div class="driver-topbar">
+
+                <div>
+
+                    <h5 class="fw-bold mb-0">
+                        @ViewData["Title"]
+                    </h5>
+
+                    <small class="text-secondary">
+                        Driver Operations Panel
+                    </small>
+
+                </div>
+
+                <div class="driver-top-actions">
+
+                    <!-- Driver Status -->
+                    <div class="driver-status-toggle">
+
+                        <span id="driverStatusText">
+                            @(ViewBag.IsDriverOnline == true ? "Online" : "Offline")
+                        </span>
+
+                        <div class="form-check form-switch m-0">
+
+                            <input class="form-check-input"
+                                   type="checkbox"
+                                   id="driverAvailabilityToggle"
+                                   @(ViewBag.IsDriverOnline == true ? "checked" : "") />
+
+                        </div>
+
+                    </div>
+
+                    <!-- Notification -->
+                    <a asp-controller="Driver"
+                       asp-action="Notifications"
+                       class="driver-icon-btn text-decoration-none text-light">
+
+                        <i class="fa-regular fa-bell"></i>
+
+                    </a>
+
+                    <!-- Profile -->
+                    <a asp-controller="Driver"
+                       asp-action="Profile"
+                       class="text-decoration-none">
+
+                        @if (!string.IsNullOrEmpty(ViewBag.DriverProfilePhoto as string))
+                        {
+                            <img src="@ViewBag.DriverProfilePhoto"
+                                 class="driver-top-profile-img"
+                                 alt="Driver" />
+                        }
+                        else
+                        {
+                            <div class="driver-avatar text-light">
+
+                                <i class="fa-solid fa-user"></i>
+
+                            </div>
+                        }
+
+                    </a>
+
+                </div>
+
+            </div>
+
+            <!-- Page Content -->
+            <div class="driver-content">
+                @RenderBody()
+            </div>
+
+        </main>
+
+    </div>
+
+    <!-- Mobile Navigation -->
+    <div class="driver-mobile-nav d-lg-none">
+
+        <a class="@IsActive("Driver", "Dashboard")"
+           asp-controller="Driver"
+           asp-action="Dashboard">
+            <i class="fa-solid fa-house"></i>
+        </a>
+
+        <a class="@IsActive("Driver", "RideRequests") @IsActive("Driver", "RideRequestsMap")"
+           asp-controller="Driver"
+           asp-action="RideRequests">
+            <i class="fa-solid fa-bell"></i>
+        </a>
+
+        <a class="@IsActive("Driver", "MyAcceptedRides") @IsActive("Driver", "NavigateRide")"
+           asp-controller="Driver"
+           asp-action="MyAcceptedRides">
+            <i class="fa-solid fa-road"></i>
+        </a>
+
+        <a class="@IsActive("Driver", "Earnings")"
+           asp-controller="Driver"
+           asp-action="Earnings">
+            <i class="fa-solid fa-wallet"></i>
+        </a>
+
+        <a class="@IsActive("Driver", "Profile")"
+           asp-controller="Driver"
+           asp-action="Profile">
+            <i class="fa-solid fa-user"></i>
+        </a>
+
+    </div>
+
+    <!-- Scripts -->
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js"></script>
+
+    <script>
+
+        // =============================
+        // Driver Live Location Tracking
+        // =============================
+
+        let locationInterval = null;
+
+        function sendLiveLocation() {
+
+            if (!navigator.geolocation)
+                return;
+
+            const toggle = document.getElementById("driverAvailabilityToggle");
+
+            if (!toggle || !toggle.checked)
+                return;
+
+            navigator.geolocation.getCurrentPosition((position) => {
+
+                $.post('/Driver/UpdateLiveLocation', {
+
+                    latitude: position.coords.latitude,
+                    longitude: position.coords.longitude
+
+                });
+
+            });
+        }
+
+        function startLiveTracking() {
+
+            stopLiveTracking();
+
+            sendLiveLocation();
+
+            locationInterval = setInterval(sendLiveLocation, 5000);
+        }
+
+        function stopLiveTracking() {
+
+            if (locationInterval) {
+
+                clearInterval(locationInterval);
+
+                locationInterval = null;
+            }
+        }
+
+        // =============================
+        // Driver Availability Toggle
+        // =============================
+
+        $(document).ready(function () {
+
+            const toggle = $("#driverAvailabilityToggle");
+
+            const statusText = $("#driverStatusText");
+
+            if (toggle.length && toggle.is(":checked")) {
+                startLiveTracking();
+            }
+
+            toggle.on("change", function () {
+
+                const isOnline = $(this).is(":checked");
+
+                $.post('/Driver/ToggleAvailability',
+                    {
+                        isOnline: isOnline
+                    },
+                    function (res) {
+
+                        if (res.success) {
+
+                            statusText.text(
+                                res.isOnline
+                                    ? "Online"
+                                    : "Offline"
+                            );
+
+                            if (res.isOnline) {
+                                startLiveTracking();
+                            }
+                            else {
+                                stopLiveTracking();
+                            }
+                        }
+                    });
+            });
+        });
+
+    </script>
+
+    <!-- SignalR -->
+    <script>
+
+        const rideConnection = new signalR.HubConnectionBuilder()
+            .withUrl("/rideHub")
+            .withAutomaticReconnect()
+            .build();
+
+        // Ride Status Updated
+        rideConnection.on("RideStatusUpdated", () => {
+            location.reload();
+        });
+
+        // New Ride Request
+        rideConnection.on("ReceiveRideRequest", () => {
+            location.reload();
+        });
+
+        // Emergency Alert
+        rideConnection.on("ReceiveEmergencyAlert", () => {
+
+            alert("Emergency alert received!");
+
+            location.reload();
+        });
+
+        // Payment Completed
+        rideConnection.on("PaymentCompleted", () => {
+            location.reload();
+        });
+
+        // Start SignalR
+        async function startRideConnection() {
+
+            try {
+
+                await rideConnection.start();
+
+                console.log("Driver SignalR Connected");
+
+            }
+            catch (err) {
+
+                console.error("SignalR Error:", err);
+
+                setTimeout(startRideConnection, 5000);
+            }
+        }
+
+        // Reconnecting
+        rideConnection.onreconnecting(() => {
+            console.warn("SignalR Reconnecting...");
+        });
+
+        // Reconnected
+        rideConnection.onreconnected(() => {
+            console.log("SignalR Reconnected");
+        });
+
+        // Connection Closed
+        rideConnection.onclose(() => {
+            console.warn("SignalR Connection Closed");
+        });
+
+        startRideConnection();
+
+    </script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+
+</body>
+</html>

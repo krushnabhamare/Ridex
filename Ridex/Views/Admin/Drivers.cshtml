@@ -1,0 +1,425 @@
+﻿@model List<Ridex.Models.Driver>
+
+@{
+    ViewData["Title"] = "Drivers";
+
+    var totalDrivers = Model?.Count ?? 0;
+
+    var approvedDrivers =
+        Model?.Count(x => x.IsApproved) ?? 0;
+
+    var pendingDrivers =
+        Model?.Count(x => !x.IsApproved &&
+                          x.IsProfileSubmitted) ?? 0;
+
+    var disabledDrivers =
+        Model?.Count(x => x.IsBlockedByAdmin) ?? 0;
+}
+
+<div class="row g-4 mb-4">
+
+    <!-- TOTAL -->
+    <div class="col-md-3">
+
+        <div class="card p-4">
+
+            <small class="text-secondary">
+
+                Total Drivers
+
+            </small>
+
+            <h3 class="fw-bold mt-2">
+
+                @totalDrivers
+
+            </h3>
+
+            <small class="text-info">
+
+                Registered
+
+            </small>
+
+        </div>
+
+    </div>
+
+    <!-- APPROVED -->
+    <div class="col-md-3">
+
+        <div class="card p-4">
+
+            <small class="text-secondary">
+
+                Approved
+
+            </small>
+
+            <h3 class="fw-bold mt-2">
+
+                @approvedDrivers
+
+            </h3>
+
+            <small class="text-success">
+
+                Active
+
+            </small>
+
+        </div>
+
+    </div>
+
+    <!-- PENDING -->
+    <div class="col-md-3">
+
+        <div class="card p-4">
+
+            <small class="text-secondary">
+
+                Pending Approval
+
+            </small>
+
+            <h3 class="fw-bold mt-2">
+
+                @pendingDrivers
+
+            </h3>
+
+            <small class="text-warning">
+
+                Waiting
+
+            </small>
+
+        </div>
+
+    </div>
+
+    <!-- DISABLED -->
+    <div class="col-md-3">
+
+        <div class="card p-4">
+
+            <small class="text-secondary">
+
+                Disabled
+
+            </small>
+
+            <h3 class="fw-bold mt-2">
+
+                @disabledDrivers
+
+            </h3>
+
+            <small class="text-danger">
+
+                Blocked
+
+            </small>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- TABLE -->
+<div class="card p-4">
+
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+
+        <h4 class="fw-bold mb-0">
+
+            Driver Management
+
+        </h4>
+
+        <span class="badge bg-warning text-dark">
+
+            @totalDrivers Drivers
+
+        </span>
+
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-responsive">
+
+        <table class="table table-hover align-middle mb-0">
+
+            <thead>
+
+                <tr>
+
+                    <th>Driver</th>
+
+                    <th>Email</th>
+
+                    <th>Phone</th>
+
+                    <th>License</th>
+
+                    <th>Status</th>
+
+                    <th>Availability</th>
+
+                    <th>Action</th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                @if (Model != null && Model.Any())
+                {
+                    @foreach (var driver in Model)
+                    {
+                        <tr>
+
+                            <!-- DRIVER -->
+                            <td>
+
+                                <div class="d-flex align-items-center gap-3">
+
+                                    @if (!string.IsNullOrEmpty(driver.User?.ProfilePhoto))
+                                    {
+                                        <img src="@driver.User.ProfilePhoto"
+                                             class="rounded-circle"
+                                             width="45"
+                                             height="45"
+                                             style="object-fit:cover;" />
+                                    }
+                                    else
+                                    {
+                                        <div class="rounded-circle bg-dark d-flex align-items-center justify-content-center"
+                                             style="width:45px;height:45px;">
+
+                                            <i class="fa-solid fa-user text-white"></i>
+
+                                        </div>
+                                    }
+
+                                    <div>
+
+                                        <div class="fw-semibold">
+
+                                            @(driver.User?.FullName ?? "Driver")
+
+                                        </div>
+
+                                        <small class="text-secondary">
+
+                                            #@driver.Id
+
+                                        </small>
+
+                                    </div>
+
+                                </div>
+
+                            </td>
+
+                            <!-- EMAIL -->
+                            <td>
+
+                                @(driver.User?.Email ?? "-")
+
+                            </td>
+
+                            <!-- PHONE -->
+                            <td>
+
+                                @(driver.User?.PhoneNumber ?? "-")
+
+                            </td>
+
+                            <!-- LICENSE -->
+                            <td>
+
+                                @if (!string.IsNullOrEmpty(driver.LicenseNumber))
+                                {
+                                    <span class="fw-semibold">
+
+                                        @driver.LicenseNumber
+
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="text-secondary">
+
+                                        Not Submitted
+
+                                    </span>
+                                }
+
+                            </td>
+
+                            <!-- STATUS -->
+                            <td>
+
+                                @if (driver.IsApproved)
+                                {
+                                    <span class="badge bg-success">
+
+                                        Approved
+
+                                    </span>
+                                }
+                                else if (!driver.IsProfileSubmitted)
+                                {
+                                    <span class="badge bg-secondary">
+
+                                        Incomplete
+
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning text-dark">
+
+                                        Pending
+
+                                    </span>
+                                }
+
+                            </td>
+
+                            <!-- AVAILABILITY -->
+                            <td>
+
+                                @if (driver.IsAvailable)
+                                {
+                                    <span class="badge bg-success">
+
+                                        Online
+
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-dark">
+
+                                        Offline
+
+                                    </span>
+                                }
+
+                            </td>
+
+                            <!-- ACTION -->
+                            <td>
+
+                                @if (driver.IsApproved &&
+                                                        !driver.IsBlockedByAdmin)
+                                {
+                                    <form asp-action="DisableDriver"
+                                          method="post"
+                                          class="d-inline">
+
+                                        @Html.AntiForgeryToken()
+
+                                        <input type="hidden"
+                                               name="id"
+                                               value="@driver.Id" />
+
+                                        <button type="submit"
+                                                class="btn btn-sm btn-danger">
+
+                                            Disable
+
+                                        </button>
+
+                                    </form>
+                                }
+                                else if (driver.IsApproved &&
+                                driver.IsBlockedByAdmin)
+                                {
+                                    <form asp-action="EnableDriver"
+                                          method="post"
+                                          class="d-inline">
+
+                                        @Html.AntiForgeryToken()
+
+                                        <input type="hidden"
+                                               name="id"
+                                               value="@driver.Id" />
+
+                                        <button type="submit"
+                                                class="btn btn-sm btn-primary">
+
+                                            Enable
+
+                                        </button>
+
+                                    </form>
+                                }
+                                else if (!driver.IsProfileSubmitted)
+                                {
+                                    <span class="badge bg-secondary">
+
+                                        Incomplete
+
+                                    </span>
+                                }
+                                else
+                                {
+                                    <form asp-action="ApproveDriver"
+                                          method="post"
+                                          class="d-inline">
+
+                                        @Html.AntiForgeryToken()
+
+                                        <input type="hidden"
+                                               name="id"
+                                               value="@driver.Id" />
+
+                                        <button type="submit"
+                                                class="btn btn-sm btn-success">
+
+                                            Approve
+
+                                        </button>
+
+                                    </form>
+                                }
+
+                            </td>
+
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+
+                        <td colspan="7"
+                            class="text-center py-5">
+
+                            <i class="fa-solid fa-id-card fa-2x mb-3 text-secondary"></i>
+
+                            <div class="fw-semibold">
+
+                                No drivers found
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+                }
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>

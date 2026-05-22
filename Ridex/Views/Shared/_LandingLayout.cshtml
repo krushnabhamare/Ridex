@@ -1,0 +1,121 @@
+﻿<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <!-- META -->
+    <meta charset="utf-8" />
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+
+    <title>
+
+        @ViewData["Title"] - Ridex
+
+    </title>
+
+    <!-- SEO -->
+    <meta name="description"
+          content="Ridex - Smart ride booking platform for riders and drivers." />
+
+    <meta name="theme-color"
+          content="#0b0f19" />
+
+    <!-- ICON -->
+    <link rel="icon"
+          type="image/png"
+          href="~/favicon.png" />
+
+    <!-- PRECONNECT -->
+    <link rel="preconnect"
+          href="https://cdnjs.cloudflare.com" />
+
+    <!-- CSS -->
+    <link rel="stylesheet"
+          href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+
+    <link rel="stylesheet"
+          href="~/css/site.css"
+          asp-append-version="true" />
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+
+    <!-- LANDING STYLES -->
+    <style>
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body.landing-body {
+            min-height: 100vh;
+            overflow-x: hidden;
+            text-rendering: optimizeLegibility;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .landing-shell {
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* Smooth auth page appearance */
+
+        .landing-shell {
+            animation: landingFade 0.25s ease;
+        }
+
+        @@keyframes landingFade {
+            from
+
+        {
+            opacity: 0;
+            transform: translateY(8px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        }
+
+        /* Better mobile spacing */
+
+        @@media (max-width: 768px) {
+            .landing-shell
+
+        {
+            padding: 0;
+        }
+
+        }
+    </style>
+
+</head>
+
+<body class="landing-body">
+
+    <!-- MAIN -->
+    <div class="landing-shell">
+
+        @RenderBody()
+
+    </div>
+
+    <!-- SCRIPTS -->
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+    @await RenderSectionAsync(
+    "Scripts",
+        required: false)
+
+</body>
+
+</html>
