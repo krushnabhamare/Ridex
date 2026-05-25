@@ -142,8 +142,7 @@ namespace Ridex.Controllers
             {
                 ride.Status = "Completed";
 
-                TempData["Success"] =
-                    "Cash payment selected. Please pay the driver directly.";
+                TempData["CashAlert"] ="Cash selected. Please pay the driver directly and wait for confirmation.";
             }
             else
             {

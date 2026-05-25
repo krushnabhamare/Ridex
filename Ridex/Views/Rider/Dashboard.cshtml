@@ -84,7 +84,11 @@
        DESKTOP UNCHANGED
     ========================= */
 
-    @@media (max-width: 400px) {
+    @@media (max-width: 450px) {
+
+        .table th:nth-child(2), .table td:nth-child(2), .table th:nth-child(5), .table td:nth-child(5) {
+            display: none;
+        }
         /* SPACING */
         .row {
             --bs-gutter-x: 8px;
@@ -176,7 +180,7 @@
         .badge {
             font-size: 10px !important;
             padding: 6px 10px !important;
-            min-width: 75px; /* SAME SIZE FOR ALL */
+            min-width: 71px; /* SAME SIZE FOR ALL */
             border-radius: 20px;
             display: inline-flex;
             justify-content: center;
