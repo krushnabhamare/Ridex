@@ -327,9 +327,9 @@
 
     <script>
 
-        // =============================
+        
         // Cached Elements
-        // =============================
+        
 
         const rideStatusBadge =
             document.getElementById(
@@ -347,9 +347,9 @@
             document.getElementById(
                 "emergencyAckText");
 
-        // =============================
+        
         // Bootstrap Modals
-        // =============================
+        
 
         const paymentModal =
             new bootstrap.Modal(
@@ -361,9 +361,9 @@
                 document.getElementById(
                     'emergencyAckPopup'));
 
-        // =============================
+        
         // Map Init
-        // =============================
+        
 
         const map =
             L.map(
@@ -378,9 +378,9 @@
                 ],
                 13);
 
-        // =============================
+        
         // Tile Layer
-        // =============================
+        
 
         L.tileLayer(
             'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
@@ -398,9 +398,9 @@
 
         }, 700);
 
-        // =============================
+        
         // Pickup Marker
-        // =============================
+        
 
         const pickupMarker =
             L.marker([
@@ -410,9 +410,9 @@
             .addTo(map)
             .bindPopup("Pickup");
 
-        // =============================
+        
         // Drop Marker
-        // =============================
+        
 
         const dropMarker =
             L.marker([
@@ -422,9 +422,9 @@
             .addTo(map)
             .bindPopup("Drop");
 
-        // =============================
+        
         // Driver Marker
-        // =============================
+        
 
         const driverMarker =
             L.marker([
@@ -435,9 +435,9 @@
             .addTo(map)
             .bindPopup("Driver");
 
-        // =============================
+        
         // Route Line
-        // =============================
+        
 
         const routeLine =
             L.polyline(
@@ -464,9 +464,9 @@
                 padding: [40, 40]
             });
 
-        // =============================
+        
         // Timeline Update
-        // =============================
+        
 
         function updateTimeline(status) {
 
@@ -498,9 +498,9 @@
             }
         }
 
-        // =============================
+        
         // Badge Classes
-        // =============================
+        
 
         function getStatusClass(status) {
 
@@ -529,9 +529,9 @@
             }
         }
 
-        // =============================
+        
         // SignalR Safety
-        // =============================
+        
 
         if (typeof riderConnection === "undefined") {
 
@@ -540,9 +540,9 @@
         }
         else {
 
-            // =============================
+            
             // Reconnect Handling
-            // =============================
+            
 
             riderConnection.onreconnected(
                 function () {
@@ -551,9 +551,9 @@
                         "SignalR reconnected.");
                 });
 
-            // =============================
+            
             // Driver Location
-            // =============================
+            
 
             riderConnection.on(
                 "DriverLocationUpdated",
@@ -568,9 +568,9 @@
                     ]);
                 });
 
-            // =============================
+            
             // Ride Status
-            // =============================
+            
 
             riderConnection.on(
                 "RideStatusUpdated",
@@ -599,9 +599,9 @@
                     }
                 });
 
-            // =============================
+            
             // Ride Completed
-            // =============================
+            
 
             riderConnection.on(
                 "RideCompleted",
@@ -623,9 +623,9 @@
                     paymentModal.show();
                 });
 
-            // =============================
+            
             // Emergency Response
-            // =============================
+            
 
             riderConnection.on(
                 "EmergencyAcknowledged",
@@ -641,9 +641,9 @@
                 });
         }
 
-        // =============================
+        
         // Emergency Button Protection
-        // =============================
+        
 
         document
             .querySelectorAll(".emergency-form")

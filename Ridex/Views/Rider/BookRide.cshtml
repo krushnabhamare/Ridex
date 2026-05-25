@@ -275,9 +275,9 @@
 
     <script>
 
-        // =============================
+        
         // Cached Elements
-        // =============================
+        
 
         const pickupText =
             $("#pickupText");
@@ -318,9 +318,9 @@
         const currentLocationBtn =
             $("#useCurrentLocation");
 
-        // =============================
+        
         // Map Init
-        // =============================
+        
 
         const map =
             L.map(
@@ -352,17 +352,17 @@
             map.invalidateSize();
         }, 700);
 
-        // =============================
+        
         // Variables
-        // =============================
+        
 
         let pickupMarker = null;
         let dropMarker = null;
         let routeLine = null;
 
-        // =============================
+        
         // Icons
-        // =============================
+        
 
         const pickupIcon =
             L.icon({
@@ -380,9 +380,9 @@
                 iconSize: [38, 38]
             });
 
-        // =============================
+        
         // Reverse Geocode
-        // =============================
+        
 
         async function reverseGeocode(lat, lng) {
 
@@ -407,9 +407,9 @@
             }
         }
 
-        // =============================
+        
         // Pickup
-        // =============================
+        
 
         async function setPickup(lat, lng) {
 
@@ -450,9 +450,9 @@
             calculateDistance();
         }
 
-        // =============================
+        
         // Drop
-        // =============================
+        
 
         async function setDrop(lat, lng) {
 
@@ -493,9 +493,9 @@
             calculateDistance();
         }
 
-        // =============================
+        
         // Search
-        // =============================
+        
 
         async function searchLocation(query, type) {
 
@@ -535,9 +535,9 @@
             }
         }
 
-        // =============================
+        
         // Route
-        // =============================
+        
 
         function drawRouteLine() {
 
@@ -577,9 +577,9 @@
                 });
         }
 
-        // =============================
+        
         // Distance
-        // =============================
+        
 
         function calculateDistance() {
 
@@ -634,9 +634,9 @@
             drawRouteLine();
         }
 
-        // =============================
+        
         // Fare
-        // =============================
+        
 
         function calculateFare() {
 
@@ -669,9 +669,9 @@
                 .text("₹" + fare.toFixed(2));
         }
 
-        // =============================
+        
         // Debounce
-        // =============================
+        
 
         function debounce(fn, delay) {
 
@@ -688,9 +688,9 @@
             };
         }
 
-        // =============================
+        
         // Events
-        // =============================
+        
 
         pickupText.on(
             "input",
@@ -717,9 +717,9 @@
             calculateFare();
         });
 
-        // =============================
+        
         // Current Location
-        // =============================
+        
 
         currentLocationBtn.click(function () {
 
@@ -774,9 +774,9 @@
                 });
         });
 
-        // =============================
+        
         // Map Click
-        // =============================
+        
 
         map.on(
             "click",
@@ -805,9 +805,9 @@
                     e.latlng.lng);
             });
 
-        // =============================
+        
         // Submit
-        // =============================
+        
 
         rideForm.submit(function () {
 

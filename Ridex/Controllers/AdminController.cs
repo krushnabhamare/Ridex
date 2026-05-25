@@ -30,9 +30,9 @@ namespace Ridex.Controllers
             _hubContext = hubContext;
         }
 
-        // =============================
+        
         // Dashboard
-        // =============================
+        
 
         public async Task<IActionResult> Dashboard()
         {
@@ -115,9 +115,9 @@ namespace Ridex.Controllers
             return View(rides);
         }
 
-        // =============================
+        
         // Live Operations
-        // =============================
+        
 
         public async Task<IActionResult> LiveOperations()
         {
@@ -135,9 +135,9 @@ namespace Ridex.Controllers
             return View(liveRides);
         }
 
-        // =============================
+        
         // Users
-        // =============================
+        
 
         public async Task<IActionResult> Users()
         {
@@ -149,9 +149,9 @@ namespace Ridex.Controllers
             return View(users);
         }
 
-        // =============================
+        
         // Drivers
-        // =============================
+        
 
         public async Task<IActionResult> Drivers()
         {
@@ -164,9 +164,9 @@ namespace Ridex.Controllers
             return View(drivers);
         }
 
-        // =============================
+        
         // Rides
-        // =============================
+        
 
         public async Task<IActionResult> Rides()
         {
@@ -180,9 +180,9 @@ namespace Ridex.Controllers
             return View(rides);
         }
 
-        // =============================
+        
         // Payments
-        // =============================
+        
 
         public async Task<IActionResult> Payments()
         {
@@ -196,9 +196,9 @@ namespace Ridex.Controllers
             return View(payments);
         }
 
-        // =============================
+        
         // Reports
-        // =============================
+        
 
         public async Task<IActionResult> Reports()
         {
@@ -212,9 +212,9 @@ namespace Ridex.Controllers
             return View(reportData);
         }
 
-        // =============================
+        
         // Analytics
-        // =============================
+        
 
         public async Task<IActionResult> Analytics()
         {
@@ -229,9 +229,9 @@ namespace Ridex.Controllers
             return View(rides);
         }
 
-        // =============================
+        
         // Approve Driver
-        // =============================
+        
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ApproveDriver(int id)
@@ -263,9 +263,9 @@ namespace Ridex.Controllers
             return RedirectToAction("Drivers");
         }
 
-        // =============================
+        
         // Disable Driver
-        // =============================
+        
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DisableDriver(int id)
@@ -288,9 +288,9 @@ namespace Ridex.Controllers
             return RedirectToAction("Drivers");
         }
 
-        // =============================
+        
         // Enable Driver
-        // =============================
+        
                 [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EnableDriver(int id)
@@ -311,9 +311,9 @@ namespace Ridex.Controllers
             return RedirectToAction("Drivers");
         }
 
-        // =============================
+        
         // Emergency Notifications
-        // =============================
+        
 
         public async Task<IActionResult> Notifications()
         {
@@ -326,9 +326,9 @@ namespace Ridex.Controllers
             return View(alerts);
         }
 
-        // =============================
+        
         // Mark Alert Read
-        // =============================
+        
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -359,9 +359,9 @@ namespace Ridex.Controllers
             return RedirectToAction("Notifications");
         }
 
-        // =============================
+        
         // Clear Alert
-        // =============================
+        
 
         [HttpPost]
         [ValidateAntiForgeryToken]

@@ -27,9 +27,9 @@ namespace Ridex.Controllers
             _emailService = emailService;
         }
 
-        // =============================
+        
         // Register
-        // =============================
+        
 
         [HttpGet]
         public IActionResult Register()
@@ -123,9 +123,9 @@ namespace Ridex.Controllers
             };
         }
 
-        // =============================
+        
         // Login
-        // =============================
+        
 
         [HttpGet]
         public IActionResult Login()
@@ -177,9 +177,9 @@ namespace Ridex.Controllers
             return RedirectToAction("Dashboard","Rider");
         }
 
-        // =============================
+        
         // Logout
-        // =============================
+        
 
         public async Task<IActionResult> Logout()
         {
@@ -188,9 +188,9 @@ namespace Ridex.Controllers
             return RedirectToAction("Login");
         }
 
-        // =============================
+        
         // Forgot Password
-        // =============================
+        
 
         [HttpGet]
         public IActionResult ForgotPassword()
@@ -237,9 +237,9 @@ namespace Ridex.Controllers
             return RedirectToAction("Login");
         }
 
-        // =============================
+        
         // Reset Password
-        // =============================
+        
 
         [HttpGet]
         public IActionResult ResetPassword(

@@ -12,9 +12,9 @@ namespace Ridex.Services
             _config = config;
         }
 
-        // =============================
+        
         // Send OTP / Email
-        // =============================
+        
 
         public async Task SendOtpEmailAsync(
             string toEmail,
