@@ -195,7 +195,20 @@
         </div>
 
     </div>
+    @if (Model.Status == "Completed")
+    {
+        <div class="mt-3">
 
+            <a href="/Payment/Pay?rideId=@Model.Id"
+               class="btn btn-success w-100 py-3 fw-semibold">
+
+                <i class="fa-solid fa-credit-card me-2"></i>
+                Pay Now
+
+            </a>
+
+        </div>
+    }
     <!-- MAP -->
     <div id="trackMap"></div>
 

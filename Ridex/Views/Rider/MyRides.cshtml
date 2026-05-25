@@ -2,43 +2,21 @@
 
 @{
     ViewData["Title"] = "My Rides";
-
     Layout = "~/Views/Shared/_RiderLayout.cshtml";
 }
 
 @functions {
-
-    bool HasTrackableStatus(string status)
-    {
-        return status == "Pending" ||
-               status == "Accepted" ||
-               status == "Started";
-    }
-
     string GetRideBadge(string status)
     {
         return status switch
         {
-            "Pending" =>
-                "bg-warning text-dark",
-
-            "Accepted" =>
-                "bg-info text-dark",
-
-            "Started" =>
-                "bg-primary",
-
-            "Completed" =>
-                "bg-success",
-
-            "Paid" =>
-                "bg-success",
-
-            "Cancelled" =>
-                "bg-danger",
-
-            _ =>
-                "bg-dark"
+            "Pending" => "bg-warning text-dark",
+            "Accepted" => "bg-info text-dark",
+            "Started" => "bg-primary",
+            "Completed" => "bg-success",
+            "Paid" => "bg-success",
+            "Cancelled" => "bg-danger",
+            _ => "bg-dark"
         };
     }
 }
@@ -49,337 +27,202 @@
         color: #fff;
     }
 
-</style>
+    /* MOBILE FIX */
+    @@media (max-width: 480px) {
+        .myrides-table {
+            display: none !important;
+        }
 
+        .myrides-mobile {
+            display: block !important;
+        }
+    }
+
+    /* LIST */
+    .ride-row {
+        background: rgba(255,255,255,0.04);
+        border-radius: 14px;
+        transition: 0.2s;
+    }
+
+        .ride-row:hover {
+            background: rgba(255,255,255,0.06);
+        }
+
+    /* PREMIUM CARD */
+    .ride-detail-card {
+        background: linear-gradient(145deg, #0f172a, #020617);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 18px;
+        box-shadow: 0 12px 30px rgba(0,0,0,0.45);
+        animation: slideFade 0.25s ease;
+    }
+
+    @@keyframes slideFade {
+        from {
+            opacity: 0;
+            transform: translateY(-12px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+</style>
+@if (TempData["CashAlert"] != null)
+{
+    <div class="alert alert-warning border-0 shadow-sm fw-semibold">
+        @TempData["CashAlert"]
+    </div>
+}
 <div class="container mt-4">
 
     <!-- HEADER -->
     <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
-
         <div>
-
-            <h2 class="fw-bold mb-1 myrides-title">
-
-                My Rides
-
-            </h2>
-
+            <h2 class="fw-bold mb-1 myrides-title">My Rides</h2>
             <small class="text-secondary">
-
                 Track, manage and review all your booked rides
-
             </small>
-
         </div>
 
-        <a asp-action="BookRide"
-           class="btn btn-warning fw-semibold px-4">
-
+        <a asp-action="BookRide" class="btn btn-warning fw-semibold px-4">
             Book Ride
-
         </a>
-
     </div>
 
-    <!-- ALERTS -->
-    @if (TempData["Success"] != null)
+    <!-- 🔥 DETAIL CARD (TOP) -->
+    @foreach (var ride in Model)
     {
-        <div class="alert alert-success border-0 shadow-sm">
+        <div id="ride-@ride.Id" class="ride-detail-card d-none p-3 mb-3">
 
-            @TempData["Success"]
+            <div class="d-flex justify-content-between align-items-start">
+
+                <div class="fw-bold fs-5 text-light">
+                    @ride.PickupLocation → @ride.DropLocation
+                </div>
+
+                <button class="btn btn-danger btn-sm rounded-circle px-2"
+                        onclick="closeRide(@ride.Id)">
+                    ✕
+                </button>
+
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mt-2 mb-2">
+
+                <span class="text-warning fw-bold fs-6">
+                    ₹@ride.Fare
+                </span>
+
+                <span class="badge @GetRideBadge(ride.Status)">
+                    @ride.Status
+                </span>
+
+            </div>
+
+            <div class="small text-secondary">
+                OTP: <span class="fw-semibold text-light">@ride.OTP</span>
+            </div>
+
+            <div class="small text-secondary">
+                @ride.CreatedAt.ToString("dd MMM yyyy hh:mm tt")
+            </div>
 
         </div>
     }
 
-    @if (TempData["Error"] != null)
-    {
-        <div class="alert alert-danger border-0 shadow-sm">
-
-            @TempData["Error"]
-
-        </div>
-    }
-
-    <!-- TABLE -->
-    <div class="card p-3 shadow-sm border-0">
+    <!-- DESKTOP TABLE -->
+    <div class="card p-3 shadow-sm border-0 myrides-table">
 
         <div class="table-responsive">
 
-            <table class="table table-hover align-middle mb-0 rider-table">
+            <table class="table table-hover align-middle mb-0">
 
                 <thead>
-
                     <tr>
-
                         <th>Pickup</th>
-
                         <th>Drop</th>
-
                         <th>Fare</th>
-
                         <th>Status</th>
-
                         <th>OTP</th>
-
                         <th>Date</th>
-
-                        <th class="text-end">
-
-                            Action
-
-                        </th>
-
                     </tr>
-
                 </thead>
 
                 <tbody>
-
-                    @if (Model != null && Model.Any())
+                    @foreach (var ride in Model)
                     {
-                        @foreach (var ride in Model)
-                        {
-                            bool isTrackable =
-                            HasTrackableStatus(
-                            ride.Status);
+                        <tr>
+                            <td>@ride.PickupLocation</td>
+                            <td>@ride.DropLocation</td>
+                            <td class="text-warning fw-semibold">₹@ride.Fare</td>
 
-                            <tr id="ride-row-@ride.Id">
+                            <td>
 
-                                <!-- PICKUP -->
-                                <td>
+                                <div class="d-flex flex-column gap-2 align-items-start">
 
-                                    <div class="fw-semibold">
-
-                                        @ride.PickupLocation
-
-                                    </div>
-
-                                </td>
-
-                                <!-- DROP -->
-                                <td>
-
-                                    <div class="fw-semibold">
-
-                                        @ride.DropLocation
-
-                                    </div>
-
-                                </td>
-
-                                <!-- FARE -->
-                                <td class="fw-semibold text-warning">
-
-                                    ₹@ride.Fare
-
-                                </td>
-
-                                <!-- STATUS -->
-                                <td>
-
-                                    <span class="badge rounded-pill px-3 py-2 @GetRideBadge(ride.Status)"
-                                          id="ride-status-@ride.Id">
-
+                                    <!-- STATUS -->
+                                    <span class="badge @GetRideBadge(ride.Status)">
                                         @ride.Status
-
                                     </span>
 
-                                </td>
-
-                                <!-- OTP -->
-                                <td>
-
-                                    <span class="fw-semibold">
-
-                                        @ride.OTP
-
-                                    </span>
-
-                                </td>
-
-                                <!-- DATE -->
-                                <td>
-
-                                    <small class="text-secondary">
-
-                                        @* @ride.CreatedAt
-                                        .ToString("dd MMM yyyy hh:mm tt") *@
-                                        @ride.CreatedAt.ToString("dd MMM yyyy hh:mm tt")
-                                    </small>
-
-                                    @if (ride.Status == "Cancelled" &&
-                                                                !string.IsNullOrEmpty(ride.CancelReason))
+                                    <!-- NAVIGATE -->
+                                    @if (ride.Status == "Accepted" || ride.Status == "Started")
                                     {
-                                        <small class="text-danger d-block mt-1">
-
-                                            @ride.CancelReason
-
-                                        </small>
+                                        <a asp-action="TrackRide"
+                                           asp-route-id="@ride.Id"
+                                           class="btn btn-sm btn-warning text-dark fw-semibold px-3">
+                                            Navigate
+                                        </a>
                                     }
 
-                                </td>
-
-                                <!-- ACTION -->
-                                <td class="text-end">
-
-                                    @if (isTrackable)
-                                    {
-                                        <div class="d-flex justify-content-end gap-2 flex-wrap">
-
-                                            @if (ride.Status == "Accepted")
-                                            {
-                                                <form asp-action="CancelRide"
-                                                      method="post"
-                                                      class="d-inline cancel-form">
-
-                                                    @Html.AntiForgeryToken()
-
-                                                    <input type="hidden"
-                                                           name="rideId"
-                                                           value="@ride.Id" />
-
-                                                    <button type="submit"
-                                                            class="btn btn-danger btn-sm cancel-btn">
-
-                                                        Cancel Ride
-
-                                                    </button>
-
-                                                </form>
-                                            }
-
-                                            <a asp-action="TrackRide"
-                                               asp-route-id="@ride.Id"
-                                               class="btn btn-outline-light btn-sm px-3">
-
-                                                Track
-
-                                            </a>
-
-                                        </div>
-                                    }
-                                    else if (ride.Status == "Completed")
+                                    <!-- PAYMENT -->
+                                    @if (ride.Status == "Completed")
                                     {
                                         <a asp-controller="Payment"
                                            asp-action="Pay"
                                            asp-route-rideId="@ride.Id"
-                                           class="btn btn-success btn-sm px-3">
-
+                                           class="btn btn-sm btn-success fw-semibold px-3">
                                             Pay Now
-
                                         </a>
                                     }
-                                    else if (ride.Status == "Paid")
-                                    {
-                                        <span class="badge bg-success rounded-pill px-3 py-2">
-
-                                            Paid
-
-                                        </span>
-                                    }
-                                    else if (ride.Status == "Cancelled")
-                                    {
-                                        <span class="badge bg-danger rounded-pill px-3 py-2">
-
-                                            Cancelled
-
-                                        </span>
-                                    }
-
-                                </td>
-
-                            </tr>
-                        }
-                    }
-                    else
-                    {
-                        <tr>
-
-                            <td colspan="7"
-                                class="text-center py-5">
-
-                                <i class="fa-solid fa-road fa-2x mb-3 text-secondary"></i>
-
-                                <div class="fw-semibold">
-
-                                    No rides found
 
                                 </div>
-
-                                <div class="text-secondary small mb-3">
-
-                                    You haven’t booked any rides yet.
-
-                                </div>
-
-                                <a asp-action="BookRide"
-                                   class="btn btn-warning btn-sm px-4">
-
-                                    Book Your First Ride
-
-                                </a>
 
                             </td>
 
+                            <td>@ride.OTP</td>
+                            <td>@ride.CreatedAt.ToString("dd MMM yyyy hh:mm tt")</td>
                         </tr>
                     }
-
                 </tbody>
 
             </table>
 
         </div>
-
     </div>
 
-</div>
+    <!-- MOBILE LIST -->
+    <div class="myrides-mobile" style="display:none;">
 
-<!-- PAYMENT POPUP -->
-<div class="modal fade"
-     id="paymentPopup"
-     tabindex="-1">
+        @foreach (var ride in Model)
+        {
+            <div class="ride-row d-flex justify-content-between align-items-center mb-3 p-3">
 
-    <div class="modal-dialog modal-dialog-centered">
-
-        <div class="modal-content border-0 shadow-lg">
-
-            <div class="modal-body text-center p-4">
-
-                <div class="mb-3">
-
-                    <i class="fa-solid fa-circle-check text-success fa-3x"></i>
-
+                <div class="fw-semibold text-light">
+                    @ride.PickupLocation → @ride.DropLocation
                 </div>
 
-                <h4 class="fw-bold mb-2">
-
-                    Ride Completed
-
-                </h4>
-
-                <p class="text-secondary mb-3">
-
-                    Your ride has been completed successfully.
-
-                </p>
-
-                <div class="fw-bold fs-3 text-warning mb-4"
-                     id="popupFare">
-
-                    ₹0
-
-                </div>
-
-                <button class="btn btn-success w-100 py-3 fw-semibold"
-                        id="payNowPopupBtn">
-
-                    Pay Now
-
+                <button class="btn btn-warning btn-sm rounded-circle px-2"
+                        onclick="showRide(@ride.Id)">
+                    i
                 </button>
 
             </div>
-
-        </div>
+        }
 
     </div>
 
@@ -387,161 +230,23 @@
 
 @section Scripts {
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js"></script>
-
     <script>
 
-        // =============================
-        // SignalR Connection
-        // =============================
+        function showRide(id) {
+            document.querySelectorAll('.ride-detail-card')
+                .forEach(x => x.classList.add('d-none'));
 
-        const riderRideConnection =
-            new signalR.HubConnectionBuilder()
-            .withUrl("/rideHub")
-            .withAutomaticReconnect()
-            .build();
+            document.getElementById('ride-' + id)
+                .classList.remove('d-none');
 
-        // =============================
-        // Cached Elements
-        // =============================
-
-        const paymentPopupElement =
-            document.getElementById(
-                "paymentPopup");
-
-        const paymentModal =
-            new bootstrap.Modal(
-                paymentPopupElement);
-
-        const popupFare =
-            document.getElementById(
-                "popupFare");
-
-        const payNowPopupBtn =
-            document.getElementById(
-                "payNowPopupBtn");
-
-        // =============================
-        // Ride Status Updated
-        // =============================
-
-        riderRideConnection.on(
-            "RideStatusUpdated",
-            function (data) {
-
-                const badge =
-                    document.getElementById(
-                        `ride-status-${data.RideId}`);
-
-                if (badge) {
-
-                    badge.innerText =
-                        data.Status;
-
-                    badge.className =
-                        `badge rounded-pill px-3 py-2 ${getStatusClass(data.Status)}`;
-                }
-
-                setTimeout(() => {
-
-                    window.location.reload();
-
-                }, 1200);
-            });
-
-        // =============================
-        // Ride Cancelled
-        // =============================
-
-        riderRideConnection.on(
-            "RideCancelled",
-            function () {
-
-                window.location.reload();
-            });
-
-        // =============================
-        // Ride Completed
-        // =============================
-
-        riderRideConnection.on(
-            "RideCompleted",
-            function (data) {
-
-                popupFare.innerText =
-                    "₹" + data.Fare;
-
-                payNowPopupBtn.onclick =
-                    function () {
-
-                        window.location.href =
-                            `/Payment/
-                            rideId=${data.RideId}`;
-                    };
-
-                paymentModal.show();
-            });
-
-        // =============================
-        // Badge Classes
-        // =============================
-
-        function getStatusClass(status) {
-
-            switch (status) {
-
-                case "Pending":
-                    return "bg-warning text-dark";
-
-                case "Accepted":
-                    return "bg-info text-dark";
-
-                case "Started":
-                    return "bg-primary";
-
-                case "Completed":
-                    return "bg-success";
-
-                case "Paid":
-                    return "bg-success";
-
-                case "Cancelled":
-                    return "bg-danger";
-
-                default:
-                    return "bg-dark";
-            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // =============================
-        // Cancel Protection
-        // =============================
-
-        document
-            .querySelectorAll(".cancel-form")
-            .forEach(form => {
-
-                form.addEventListener(
-                    "submit",
-                    function () {
-
-                        const btn =
-                            form.querySelector(".cancel-btn");
-
-                        btn.disabled = true;
-
-                        btn.innerText =
-                            "Cancelling...";
-                    });
-            });
-
-        // =============================
-        // Start Connection
-        // =============================
-
-        riderRideConnection.start()
-            .catch(err =>
-                console.error(err.toString()));
+        function closeRide(id) {
+            document.getElementById('ride-' + id)
+                .classList.add('d-none');
+        }
 
     </script>
+
 }
