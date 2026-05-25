@@ -261,9 +261,9 @@
 
     <script>
 
-        // =============================
+        
         // SignalR Connection
-        // =============================
+        
 
         const notificationConnection =
             new signalR.HubConnectionBuilder()
@@ -271,9 +271,9 @@
             .withAutomaticReconnect()
             .build();
 
-        // =============================
+        
         // Emergency Alerts
-        // =============================
+        
 
         notificationConnection.on(
             "EmergencyAlertReceived",
@@ -282,9 +282,9 @@
                 location.reload();
             });
 
-        // =============================
+        
         // Start Connection
-        // =============================
+        
 
         notificationConnection.start()
             .catch(err =>

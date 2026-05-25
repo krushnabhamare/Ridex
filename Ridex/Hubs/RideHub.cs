@@ -4,9 +4,9 @@ namespace Ridex.Hubs
 {
     public class RideHub : Hub
     {
-        // =============================
+        
         // Connection Events
-        // =============================
+        
 
         public override async Task OnConnectedAsync()
         {
@@ -24,27 +24,27 @@ namespace Ridex.Hubs
             await base.OnDisconnectedAsync(exception);
         }
 
-        // =============================
+        
         // Ride Status Updates
-        // =============================
+        
 
         public async Task NotifyRideStatusUpdated()
         {
             await Clients.All.SendAsync("RideStatusUpdated");
         }
 
-        // =============================
+        
         // New Ride Request
-        // =============================
+        
 
         public async Task NotifyNewRideRequest()
         {
             await Clients.All.SendAsync("ReceiveRideRequest");
         }
 
-        // =============================
+        
         // Emergency Alerts
-        // =============================
+        
 
         public async Task SendEmergencyAlert(string message)
         {
@@ -56,9 +56,9 @@ namespace Ridex.Hubs
                 });
         }
 
-        // =============================
+        
         // Emergency Acknowledgement
-        // =============================
+        
 
         public async Task EmergencyAcknowledged(string message)
         {
@@ -70,9 +70,9 @@ namespace Ridex.Hubs
                 });
         }
 
-        // =============================
+        
         // Payment Updates
-        // =============================
+        
 
         public async Task NotifyPaymentCompleted()
         {

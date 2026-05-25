@@ -23,9 +23,9 @@ namespace Ridex.Controllers
             _userManager = userManager;
         }
 
-        // =============================
+        
         // Payment Page
-        // =============================
+        
 
         public async Task<IActionResult> Pay(int rideId)
         {
@@ -56,9 +56,9 @@ namespace Ridex.Controllers
             return View(ride);
         }
 
-        // =============================
+        
         // Complete Payment
-        // =============================
+        
 
         [HttpPost]
         [ValidateAntiForgeryToken]

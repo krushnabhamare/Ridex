@@ -5,9 +5,9 @@
 
     Layout = "~/Views/Shared/_Layout.cshtml";
 
-    // =============================
+    
     // Ride Status Counts
-    // =============================
+    
 
     int pendingCount =
         Model?.Count(x =>
@@ -29,9 +29,9 @@
         Model?.Count(x =>
             x.Status == "Paid") ?? 0;
 
-    // =============================
+    
     // Vehicle Counts
-    // =============================
+    
 
     int bikeCount =
         Model?.Count(x =>
@@ -45,9 +45,9 @@
         Model?.Count(x =>
             x.VehicleType == "Car") ?? 0;
 
-    // =============================
+    
     // Top Pickup Zones
-    // =============================
+    
 
     var pickupZones =
         Model?
@@ -56,9 +56,9 @@
         .Take(5)
         .ToList();
 
-    // =============================
+    
     // Top Drop Zones
-    // =============================
+    
 
     var dropZones =
         Model?
@@ -232,9 +232,9 @@
 
     <script>
 
-        // =============================
+        
         // Status Chart
-        // =============================
+        
 
         new Chart(
             document.getElementById(
@@ -281,9 +281,9 @@
                 }
             });
 
-        // =============================
+        
         // Vehicle Chart
-        // =============================
+        
 
         new Chart(
             document.getElementById(

@@ -8,39 +8,39 @@ using Ridex.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// =============================
+
 // Database Connection
-// =============================
+
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("condb")));
 
 
-// =============================
+
 // MVC
-// =============================
+
 
 builder.Services.AddControllersWithViews();
 
 
-// =============================
+
 // SignalR
-// =============================
+
 
 builder.Services.AddSignalR();
 builder.Services.AddSingleton<IUserIdProvider, NameIdentifierUserIdProvider>();
 
-// =============================
+
 // Background Services
-// =============================
+
 
 builder.Services.AddHostedService<RideAutoCancelService>();
 
 
-// =============================
+
 // Identity Configuration
-// =============================
+
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 {
@@ -54,9 +54,9 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 .AddDefaultTokenProviders();
 
 
-// =============================
+
 // Cookie Configuration
-// =============================
+
 
 builder.Services.ConfigureApplicationCookie(options =>
 {
@@ -70,9 +70,9 @@ builder.Services.ConfigureApplicationCookie(options =>
 });
 
 
-// =============================
+
 // Custom Services
-// =============================
+
 
 builder.Services.AddScoped<EmailService>();
 
@@ -80,9 +80,9 @@ builder.Services.AddScoped<EmailService>();
 var app = builder.Build();
 
 
-// =============================
+
 // Error Handling
-// =============================
+
 
 if (!app.Environment.IsDevelopment())
 {
@@ -94,9 +94,9 @@ if (!app.Environment.IsDevelopment())
 app.UseStatusCodePagesWithReExecute("/Home/Error");
 
 
-// =============================
+
 // Middleware
-// =============================
+
 
 app.UseHttpsRedirection();
 
@@ -109,18 +109,18 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 
-// =============================
+
 // Routing
-// =============================
+
 
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 
-// =============================
+
 // SignalR Hub Mapping
-// =============================
+
 
 app.MapHub<RideHub>("/rideHub");
 

@@ -633,9 +633,9 @@
 
     <script>
 
-        // =============================
+        
         // SignalR Connection
-        // =============================
+        
 
         const globalRideConnection =
             new signalR.HubConnectionBuilder()
@@ -643,9 +643,9 @@
             .withAutomaticReconnect()
             .build();
 
-        // =============================
+        
         // Emergency Alerts
-        // =============================
+        
 
         globalRideConnection.on(
             "EmergencyAlertReceived",
@@ -665,9 +665,9 @@
                 }
             });
 
-        // =============================
+        
         // Ride Requests
-        // =============================
+        
 
         globalRideConnection.on(
             "ReceiveRideRequest",
@@ -677,9 +677,9 @@
                     "New ride request.");
             });
 
-        // =============================
+        
         // Payment Updates
-        // =============================
+        
 
         globalRideConnection.on(
             "PaymentCompleted",
@@ -689,17 +689,17 @@
                     "Payment completed.");
             });
 
-        // =============================
+        
         // Start Connection
-        // =============================
+        
 
         globalRideConnection.start()
             .catch(err =>
                 console.error(err.toString()));
 
-        // =============================
+        
         // Admin Sidebar Toggle
-        // =============================
+        
 
       const sidebarToggle = document.getElementById("adminSidebarToggle");
 const adminSidebar = document.getElementById("adminSidebar");
